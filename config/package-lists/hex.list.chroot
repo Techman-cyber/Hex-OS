@@ -1,0 +1,46 @@
+# Desktop (KDE Plasma, X11 session: works in virtual machines)
+kde-plasma-desktop
+sddm
+plasma-nm
+plasma-pa
+powerdevil
+kscreen
+systemsettings
+kwin-x11
+dolphin
+konsole
+kio-extras
+breeze-gtk-theme
+kde-config-gtk-style
+qdbus-qt5
+# Looks
+plank
+papirus-icon-theme
+fonts-inter
+fonts-jetbrains-mono
+fonts-noto-core
+fonts-noto-color-emoji
+# Graphics, audio, basics (needed because recommends are off to keep the ISO small)
+xserver-xorg
+xserver-xorg-input-libinput
+libgl1-mesa-dri
+mesa-utils
+pulseaudio
+network-manager
+sudo
+policykit-1
+dbus-x11
+xdg-utils
+xdg-user-dirs
+shared-mime-info
+desktop-file-utils
+# Apps
+firefox-esr
+# Installer
+calamares
+calamares-settings-debian
+# Wi-Fi and common hardware firmware
+firmware-iwlwifi
+firmware-realtek
+firmware-atheros
+firmware-misc-nonfree
