@@ -1,0 +1,5 @@
+[Desktop Entry]
+Type=Application
+Name=HEX setup
+Exec=bash /usr/local/bin/hex-setup
+X-GNOME-Autostart-enabled=true
