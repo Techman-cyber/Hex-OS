@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+# Runs once after first login: wallpaper, dark theme, icons, window effects, dock.
+M="$HOME/.config/hex-setup-done"; [ -f "$M" ] && exit 0
+sleep 5
+kw(){ kwriteconfig5 --file "$1" --group "$2" --key "$3" "$4"; }
+plasma-apply-colorscheme BreezeDark >/dev/null 2>&1
+plasma-apply-wallpaperimage /usr/share/backgrounds/hex/hex-wallpaper.jpg >/dev/null 2>&1
+kw kdeglobals Icons Theme Papirus-Dark
+kw kdeglobals General font "Inter,10,-1,5,50,0,0,0,0,0"
+kw kdeglobals KDE AnimationDurationFactor 0.6
+for e in blur wobblywindows magiclamp translucency overview desktopgrid slidingpopups fade; do kw kwinrc Plugins "${e}Enabled" true; done
+kw kwinrc Plugins diminactiveEnabled true
+dbus-send --session --type=signal /KGlobalSettings org.kde.KGlobalSettings.notifyChange int32:4 int32:0 2>/dev/null
+Q=$(command -v qdbus-qt5 || command -v qdbus || true)
+if [ -n "$Q" ]; then
+  "$Q" org.kde.KWin /KWin reconfigure >/dev/null 2>&1
+  "$Q" org.kde.plasmashell /PlasmaShell org.kde.PlasmaShell.evaluateScript 'var ps=panels();for(var i=0;i<ps.length;i++){ps[i].location="top";ps[i].height=28;}' >/dev/null 2>&1
+fi
+D="net.launchpad.plank.dock.settings:/net/launchpad/plank/docks/dock1/"
+gsettings set "$D" zoom-enabled true
+gsettings set "$D" zoom-percent 220
+gsettings set "$D" icon-size 52
+gsettings set "$D" theme 'Transparent'
+gsettings set "$D" hide-mode 'intelligent'
+pkill plank 2>/dev/null; (nohup plank >/dev/null 2>&1 &)
+touch "$M"
