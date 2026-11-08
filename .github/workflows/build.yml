@@ -3,25 +3,43 @@ on:
   push:
     tags: ["v*"]
   workflow_dispatch:
+
 permissions:
   contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
     container:
       image: debian:bookworm
       options: --privileged
+
     steps:
+      - name: Fix Debian APT sources
+        run: |
+          set -eux
+          rm -f /etc/apt/sources.list /etc/apt/sources.list.d/*.list /etc/apt/sources.list.d/*.sources
+          cat > /etc/apt/sources.list <<'EOF'
+          deb http://deb.debian.org/debian bookworm main
+          deb http://deb.debian.org/debian bookworm-updates main
+          deb http://deb.debian.org/debian-security bookworm-security main
+          EOF
+          apt-get update
+
       - name: Install tools
-        run: apt-get update && apt-get install -y git ca-certificates
+        run: apt-get install -y --no-install-recommends git ca-certificates
+
       - uses: actions/checkout@v4
+
       - name: Check scripts and package names
         run: |
           bash -n build.sh
           for f in config/includes.chroot/usr/local/bin/*; do bash -n "$f"; done
           bash scripts/check-packages.sh
+
       - name: Build ISO
         run: bash build.sh
+
       - name: Checksum and size check
         run: |
           cd out
@@ -34,10 +52,12 @@ jobs:
             rm -f *.iso
             echo "Join with: cat hex-os.iso.*.part > hex-os.iso" > JOIN-INSTRUCTIONS.txt
           fi
+
       - uses: actions/upload-artifact@v4
         with:
           name: hex-os-iso
           path: out/*
+
       - name: Publish release
         if: startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v2
