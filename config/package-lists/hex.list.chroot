@@ -39,6 +39,29 @@ firefox-esr
 # Installer
 calamares
 calamares-settings-debian
+# Safety and recovery
+ufw
+unattended-upgrades
+apparmor
+timeshift
+rsync
+# Software store (Debian apps + Flatpak/Flathub)
+flatpak
+plasma-discover
+plasma-discover-backend-flatpak
+# Everyday essentials
+bluez
+bluedevil
+spectacle
+gwenview
+ark
+kcalc
+kwrite
+# Tools used by the welcome app and the optional local AI
+kdialog
+curl
+jq
+zstd
 # Wi-Fi and common hardware firmware
 firmware-iwlwifi
 firmware-realtek
