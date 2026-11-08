@@ -1,0 +1,17 @@
+#!/bin/sh
+# Runs inside the new system while the ISO is built. Every step is best-effort.
+sed -i 's/^ENABLED=.*/ENABLED=yes/' /etc/ufw/ufw.conf 2>/dev/null || true
+systemctl enable ufw 2>/dev/null || true
+# Installer branding: Debian -> HEX OS
+for f in /etc/calamares/branding/*/branding.desc; do
+  [ -f "$f" ] && sed -i -E 's/Debian GNU\/Linux/HEX OS/g; s/^([[:space:]]*(productName|shortProductName|bootloaderEntryName):[[:space:]]*).*/\1HEX OS/' "$f"
+done
+sed -i 's/Install Debian/Install HEX OS/g; s/^Name=.*/Name=Install HEX OS/' /usr/share/applications/install-debian.desktop 2>/dev/null || true
+# System name (keep ID=debian so tools keep working)
+sed -i 's/^PRETTY_NAME=.*/PRETTY_NAME="HEX OS (based on Debian 12)"/; s/^NAME=.*/NAME="HEX OS"/' /etc/os-release 2>/dev/null || true
+echo "HEX OS \\n \\l" > /etc/issue
+# HEX colour scheme = Breeze Dark with a teal accent
+if [ -f /usr/share/color-schemes/BreezeDark.colors ]; then
+  sed '0,/^Name=/s/^Name=.*/Name=HEX/; s/61,174,233/20,150,138/g' /usr/share/color-schemes/BreezeDark.colors > /usr/share/color-schemes/HEX.colors
+fi
+exit 0
