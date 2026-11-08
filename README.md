@@ -5,11 +5,14 @@ A free, good-looking, easy operating system. Based on **Debian 12** with **KDE P
 - **Easy:** normal desktop, normal installer (Calamares), works in virtual machines
 - **Crazy looking:** dark neon theme, generated hex wallpaper, Papirus icons, blur, wobbly windows, magic-lamp minimize, window overview
 - **Interactive icons:** HEX Dock, where icons zoom as your mouse gets close
-- **Private:** no telemetry
-- **Apps:** Firefox, Dolphin files, Konsole terminal; install more from the terminal with `sudo apt install <name>`
+- **Private and safe:** no telemetry added by HEX, firewall (ufw), AppArmor, automatic security updates
+- **Recovery:** Timeshift system snapshots
+- **Apps:** Firefox, Dolphin, Konsole, plus a software store (Discover) with Debian apps and Flathub
+- **Welcome app:** first-run menu (install, apps, look, shortcuts, snapshots)
+- **Local AI (beta):** optional. Downloads a small model that runs on your own computer, only if you ask
 
 ## Download
-Open the **Releases** page and download `hex-os-*.iso`. Verify it with `SHA256SUMS.txt`.
+Open the **Releases** page and download `hex-os.iso`. Verify it with `SHA256SUMS.txt`.
 (If the ISO is split into `.part` files, see `JOIN-INSTRUCTIONS.txt`.)
 
 ## Try it in VirtualBox
