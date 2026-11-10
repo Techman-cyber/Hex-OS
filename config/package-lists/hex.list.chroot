@@ -74,8 +74,4 @@ zstd
 # Installer
 calamares
 calamares-settings-debian
-# Wi-Fi and common hardware firmware
-firmware-iwlwifi
-firmware-realtek
-firmware-atheros
-firmware-misc-nonfree
+# (Wi-Fi/hardware firmware is installed by config/hooks/normal/0100-hex-firmware.hook.chroot, best effort)
