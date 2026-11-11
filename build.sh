@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -euo pipefail
+set -Eeuo pipefail
 
 if [ "${EUID:-$(id -u)}" -ne 0 ]; then
   exec sudo bash "$0" "$@"
@@ -7,10 +7,15 @@ fi
 
 HERE="$(cd "$(dirname "$0")" && pwd)"
 
-apt-get update
+# Clean stale APT lock state before install/update
+rm -f /var/lib/dpkg/lock-frontend /var/lib/dpkg/lock
+rm -f /var/lib/apt/lists/lock
+
+apt-get update -o Acquire::Retries=5
 DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
   live-build \
   debootstrap \
+  debian-archive-keyring \
   squashfs-tools \
   xorriso \
   ca-certificates
