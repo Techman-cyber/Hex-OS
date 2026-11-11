@@ -15,7 +15,22 @@ jobs:
     steps:
       - name: Install tools
         run: |
-          sudo apt-get update
+          sudo rm -f /etc/apt/apt-mirrors.txt
+          sudo tee /etc/apt/sources.list.d/ubuntu.sources >/dev/null <<'EOF'
+          Types: deb
+          URIs: http://archive.ubuntu.com/ubuntu/
+          Suites: noble noble-updates noble-backports
+          Components: main universe restricted multiverse
+          Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg
+
+          Types: deb
+          URIs: http://security.ubuntu.com/ubuntu/
+          Suites: noble-security
+          Components: main universe restricted multiverse
+          Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg
+          EOF
+
+          sudo apt-get update -o Acquire::Retries=3
           sudo DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
             git ca-certificates live-build debootstrap squashfs-tools xorriso
 
