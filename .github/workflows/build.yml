@@ -3,7 +3,77 @@ name: Build HEX OS ISO
 on:
   push:
     tags: ["v*"]
+  workflow_dispatch:name: Build HEX OS ISO
+
+on:
+  push:
+    tags: ["v*"]
   workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Install build dependencies
+        shell: bash
+        run: |
+          set -euxo pipefail
+
+          sudo apt-get update
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+            git ca-certificates live-build debootstrap debian-archive-keyring \
+            squashfs-tools xorriso
+
+      - uses: actions/checkout@v4
+
+      - name: Check scripts for syntax mistakes
+        shell: bash
+        run: |
+          set -euxo pipefail
+          bash -n build.sh
+          for f in config/includes.chroot/usr/local/bin/* config/hooks/normal/*; do
+            [ -e "$f" ] && bash -n "$f"
+          done
+
+      - name: Package check (advisory, never blocks)
+        continue-on-error: true
+        shell: bash
+        run: bash scripts/check-packages.sh
+
+      - name: Build ISO
+        shell: bash
+        run: bash build.sh
+
+      - name: Checksum and size check
+        shell: bash
+        run: |
+          set -euxo pipefail
+          cd out
+          sha256sum *.iso > SHA256SUMS.txt
+          ls -l
+          SIZE=$(stat -c %s *.iso)
+          if [ "$SIZE" -gt 2147483648 ]; then
+            echo "ISO is over GitHub's 2 GiB release limit; splitting into parts."
+            split -b 1900M -d --additional-suffix=.part *.iso "$(basename *.iso)."
+            rm -f *.iso
+            echo "Join with: cat hex-os.iso.*.part > hex-os.iso" > JOIN-INSTRUCTIONS.txt
+          fi
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: hex-os-iso
+          path: out/*
+
+      - name: Publish release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          files: out/*
 
 permissions:
   contents: write
