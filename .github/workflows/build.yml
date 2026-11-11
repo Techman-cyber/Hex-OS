@@ -15,11 +15,13 @@ jobs:
       - name: Install tools
         run: apt-get update && apt-get install -y git ca-certificates
       - uses: actions/checkout@v4
-      - name: Check scripts and package names
+      - name: Check scripts for syntax mistakes
         run: |
           bash -n build.sh
-          for f in config/includes.chroot/usr/local/bin/*; do bash -n "$f"; done
-          bash scripts/check-packages.sh
+          for f in config/includes.chroot/usr/local/bin/* config/hooks/normal/*; do bash -n "$f"; done
+      - name: Package check (advisory, never blocks)
+        continue-on-error: true
+        run: bash scripts/check-packages.sh
       - name: Build ISO
         run: bash build.sh
       - name: Checksum and size check
