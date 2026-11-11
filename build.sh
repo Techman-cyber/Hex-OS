@@ -20,20 +20,27 @@ mkdir -p "$HERE/build" "$HERE/out"
 
 cd "$HERE/build"
 
-lb config \
-  --distribution bookworm \
-  --architectures amd64 \
-  --archive-areas "main contrib non-free non-free-firmware" \
-  --binary-images iso-hybrid \
-  --debian-installer none \
-  --apt-recommends false \
-  --memtest none \
-  --win32-loader false \
-  --chroot-squashfs-compression-type xz \
-  --iso-application "HEX OS" \
-  --iso-publisher "HEX OS" \
-  --iso-volume "HEX_OS" \
+LB_ARGS=(
+  --distribution bookworm
+  --architectures amd64
+  --archive-areas "main contrib non-free non-free-firmware"
+  --binary-images iso-hybrid
+  --debian-installer none
+  --apt-recommends false
+  --memtest none
+  --win32-loader false
+  --iso-application "HEX OS"
+  --iso-publisher "HEX OS"
+  --iso-volume "HEX_OS"
   --bootappend-live "boot=live components quiet hostname=hex"
+)
+
+# Some live-build versions do not support this flag.
+if lb --help 2>&1 | grep -q -- '--chroot-squashfs-compression-type'; then
+  LB_ARGS+=(--chroot-squashfs-compression-type xz)
+fi
+
+lb config "${LB_ARGS[@]}"
 
 cp -a "$HERE/config/." config/
 chmod -R a+rX config
