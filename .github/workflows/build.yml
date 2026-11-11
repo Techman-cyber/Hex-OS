@@ -1,29 +1,40 @@
 name: Build HEX OS ISO
+
 on:
   push:
     tags: ["v*"]
   workflow_dispatch:
+
 permissions:
   contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
-    container:
-      image: debian:bookworm
-      options: --privileged
+
     steps:
       - name: Install tools
-        run: apt-get update && apt-get install -y git ca-certificates
+        run: |
+          sudo apt-get update
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+            git ca-certificates live-build debootstrap squashfs-tools xorriso
+
       - uses: actions/checkout@v4
+
       - name: Check scripts for syntax mistakes
         run: |
           bash -n build.sh
-          for f in config/includes.chroot/usr/local/bin/* config/hooks/normal/*; do bash -n "$f"; done
+          for f in config/includes.chroot/usr/local/bin/* config/hooks/normal/*; do
+            [ -e "$f" ] && bash -n "$f"
+          done
+
       - name: Package check (advisory, never blocks)
         continue-on-error: true
         run: bash scripts/check-packages.sh
+
       - name: Build ISO
         run: bash build.sh
+
       - name: Checksum and size check
         run: |
           cd out
@@ -36,10 +47,12 @@ jobs:
             rm -f *.iso
             echo "Join with: cat hex-os.iso.*.part > hex-os.iso" > JOIN-INSTRUCTIONS.txt
           fi
+
       - uses: actions/upload-artifact@v4
         with:
           name: hex-os-iso
           path: out/*
+
       - name: Publish release
         if: startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v2
