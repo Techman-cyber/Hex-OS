@@ -22,7 +22,7 @@ Open the **Releases** page and download `hex-os.iso`. Verify it with `SHA256SUMS
 4. The desktop logs in by itself. The first start applies the HEX look after a few seconds.
 5. To install to the disk, double-click **Install HEX OS** on the desktop or in the dock.
 
-Live session login (if asked): user `user`, password `live`.
+Live session login (if a login screen appears): user `user`, password `live`. After installing, use the account you create in the installer. See `TROUBLESHOOTING.md`.
 
 ## Build it yourself
 On Debian 12: `sudo bash build.sh`. The ISO appears in `out/`.
