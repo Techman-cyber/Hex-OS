@@ -4,6 +4,7 @@ sed -i 's/^ENABLED=.*/ENABLED=yes/' /etc/ufw/ufw.conf 2>/dev/null || true
 systemctl enable ufw 2>/dev/null || true
 echo /usr/sbin/lightdm > /etc/X11/default-display-manager 2>/dev/null || true
 systemctl enable lightdm 2>/dev/null || true
+systemctl enable hex-live-setup.service 2>/dev/null || true
 for f in /etc/calamares/branding/*/branding.desc; do
   [ -f "$f" ] && sed -i -E 's/Debian GNU\/Linux/HEX OS/g; s/^([[:space:]]*(productName|shortProductName|bootloaderEntryName):[[:space:]]*).*/\1HEX OS/' "$f"
 done
