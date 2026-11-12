@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+# hex-fx: window effects. "auto" = blur (picom) on real hardware, the safe xfwm4 compositor inside virtual machines.
+# Usage: hex-fx auto | on | off | toggle | status
+CONF="$HOME/.config/hex-fx"
+mode() { [ -f "$CONF" ] && cat "$CONF" || echo auto; }
+is_vm() { systemd-detect-virt -q 2>/dev/null; }
+xfwm() { xfconf-query -c xfwm4 -p /general/use_compositing -n -t bool -s "$1" 2>/dev/null; }
+start_blur() { xfwm false; pkill -x picom 2>/dev/null; sleep 0.3; picom --config "$HOME/.config/picom/picom.conf" -b; }
+stop_blur() { pkill -x picom 2>/dev/null; xfwm true; }
+case "${1:-auto}" in
+  on) echo on > "$CONF"; start_blur ;;
+  off) echo off > "$CONF"; stop_blur ;;
+  toggle) if pgrep -x picom >/dev/null; then "$0" off; else "$0" on; fi ;;
+  status) pgrep -x picom >/dev/null && echo "blur: on" || echo "blur: off" ;;
+  *)
+    if is_vm; then xfconf-query -c xfwm4 -p /general/vblank_mode -n -t string -s off 2>/dev/null; fi
+    case "$(mode)" in
+      on) start_blur ;;
+      off) stop_blur ;;
+      *) if is_vm; then stop_blur; else start_blur; fi ;;
+    esac ;;
+esac

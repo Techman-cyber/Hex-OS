@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+# Runs once after first login: wallpaper, glass panel, Flathub, welcome window.
+M="$HOME/.config/hex-setup-done"; [ -f "$M" ] && exit 0
+sleep 2
+WP=/usr/share/backgrounds/hex/hex-wallpaper.jpg
+xfconf-query -c xfce4-desktop -l 2>/dev/null | grep -E 'last-image$' | while read -r p; do xfconf-query -c xfce4-desktop -p "$p" -s "$WP"; done
+for o in 0 $(xrandr --query 2>/dev/null | awk '/ connected/{print $1}'); do
+  b="/backdrop/screen0/monitor$o/workspace0"
+  xfconf-query -c xfce4-desktop -p "$b/last-image" -n -t string -s "$WP" 2>/dev/null || xfconf-query -c xfce4-desktop -p "$b/last-image" -s "$WP"
+  xfconf-query -c xfce4-desktop -p "$b/image-style" -n -t int -s 5 2>/dev/null || xfconf-query -c xfce4-desktop -p "$b/image-style" -s 5
+done
+# Glass-style top panel
+xfconf-query -c xfce4-panel -p /panels/panel-1/background-style -n -t int -s 1 2>/dev/null
+xfconf-query -c xfce4-panel -p /panels/panel-1/background-rgba -n -a -t double -s 0.04 -t double -s 0.07 -t double -s 0.11 -t double -s 0.60 2>/dev/null
+(flatpak remote-add --if-not-exists --user flathub https://flathub.org/repo/flathub.flatpakrepo >/dev/null 2>&1 &)
+touch "$M"
+bash /usr/local/bin/hex-welcome &
