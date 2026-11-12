@@ -1,13 +1,7 @@
-# Desktop: Xfce + LightDM (lightweight, works in every virtual machine)
+# Desktop: Xfce + LightDM
 xfce4
 xfce4-terminal
-xfce4-notifyd
-xfce4-power-manager
-xfce4-pulseaudio-plugin
-xfce4-whiskermenu-plugin
-xfce4-screenshooter
 thunar
-thunar-volman
 gvfs
 udisks2
 mousepad
@@ -16,62 +10,31 @@ file-roller
 galculator
 lightdm
 lightdm-gtk-greeter
-policykit-1-gnome
+policykit-1
+network-manager
 network-manager-gnome
-pavucontrol
-blueman
-# Display server and graphics (software rendering works everywhere)
-xserver-xorg
-xserver-xorg-core
-xserver-xorg-input-libinput
-xserver-xorg-video-vesa
-xserver-xorg-video-fbdev
-xserver-xorg-video-vmware
-x11-xserver-utils
-libgl1-mesa-dri
-mesa-utils
-# Virtual machine support (VirtualBox, QEMU/KVM)
-virtualbox-guest-x11
-virtualbox-guest-utils
-spice-vdagent
-# Session plumbing (needed because recommends are off to keep the ISO small)
 dbus-x11
 dbus-user-session
-dconf-gsettings-backend
-dconf-service
-pulseaudio
-network-manager
 sudo
-policykit-1
 xdg-utils
-xdg-user-dirs
-xdg-user-dirs-gtk
-shared-mime-info
 desktop-file-utils
-# Looks
+shared-mime-info
 plank
 arc-theme
 papirus-icon-theme
-fonts-inter
-fonts-jetbrains-mono
-fonts-noto-core
-fonts-noto-color-emoji
+fonts-dejavu-core
+fonts-liberation2
+
 # Apps
 firefox-esr
-synaptic
-flatpak
-# Safety and recovery
-ufw
-unattended-upgrades
-apparmor
-timeshift
-rsync
-# Tools used by the welcome app and the optional local AI
-zenity
 curl
 jq
 zstd
+zenity
+
 # Installer
 calamares
 calamares-settings-debian
-# (Wi-Fi/hardware firmware is installed by config/hooks/normal/0100-hex-firmware.hook.chroot, best effort)
+
+# Optional / safe fallback packages
+task-gnome-desktop
