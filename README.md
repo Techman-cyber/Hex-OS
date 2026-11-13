@@ -7,7 +7,7 @@ A free, good-looking, easy operating system. Based on **Debian 12** with the **X
 - **Interactive icons:** HEX Dock, where icons zoom as your mouse gets close
 - **Private and safe:** no telemetry added by HEX, firewall (ufw), AppArmor, automatic security updates
 - **Recovery:** Timeshift system snapshots
-- **Apps:** Firefox, Thunar files, terminal, Synaptic for Debian apps, and Flatpak/Flathub
+- **Apps:** Firefox, Thunar files, terminal, a simple app installer for Debian apps and Flatpak/Flathub
 - **Welcome app:** first-run menu (install, apps, look, shortcuts, snapshots)
 - **Local AI (beta):** optional. Downloads a small model that runs on your own computer, only if you ask
 

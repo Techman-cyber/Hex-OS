@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.4.1
+- Removed Synaptic (its dependency `debtags` broke the live-build package install). "Get apps" is now a small built-in installer for Debian (apt) and Flathub apps.
+- Build failures now show the error lines first, plus free disk space, in the run's annotation.
+
 ## 0.4
 - Login: the live account (`user` / `live`) is now created and unlocked on every live boot, and auto-login is generated only in the live session (it used to be a fixed file that would also end up in installed systems). Guest login off.
 - Flicker: virtual GPUs (VirtualBox, QEMU, VMware) use the kernel modesetting driver without GL acceleration; the VMware X driver was removed; the dock no longer restarts at first login; vsync off for the window manager in VMs.
