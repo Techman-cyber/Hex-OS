@@ -41,8 +41,11 @@ jobs:
         if: failure()
         shell: bash
         run: |
-          MSG=$(tail -n 40 build.log 2>/dev/null | sed 's/%/%25/g' | awk '{printf "%s%%0A", $0}')
-          echo "::error title=Build failed, last log lines::${MSG}"
+          enc() { sed 's/%/%25/g' | awk '{printf "%s%%0A", substr($0,1,220)}'; }
+          ERR=$( { grep -nE "^E: |dpkg: error|Errors were encountered|No space left|returned error|cannot |Unable to|failed" build.log | tail -n 12; df -h / /tmp | head -4; } 2>/dev/null | enc)
+          echo "::error title=Build failed - error lines and disk space::${ERR}"
+          LAST=$(tail -n 12 build.log 2>/dev/null | enc)
+          echo "::error title=Build failed - last log lines::${LAST}"
           { echo '### Build failed. Last 80 log lines'; echo '```'; tail -n 80 build.log 2>/dev/null; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload full build log
