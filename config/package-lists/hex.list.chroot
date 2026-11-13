@@ -31,9 +31,7 @@ x11-xserver-utils
 libgl1-mesa-dri
 mesa-utils
 
-# Virtual machine support (VirtualBox, QEMU/KVM)
-virtualbox-guest-x11
-virtualbox-guest-utils
+# Virtual machine support
 spice-vdagent
 
 # Login, keyboard and locale basics
