@@ -1,0 +1,6 @@
+[Desktop Entry]
+Type=Application
+Name=HEX AI (beta)
+Exec=bash /usr/local/bin/hex-ai
+Icon=face-smile
+Categories=Utility;

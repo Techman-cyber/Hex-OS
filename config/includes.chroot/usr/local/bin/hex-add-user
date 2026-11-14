@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+# Create a new account on this system.
+U=$(zenity --entry --title="Create account" --text="New username (lowercase letters and numbers):") || exit 0
+[[ "$U" =~ ^[a-z][a-z0-9_-]{0,30}$ ]] || { zenity --error --text="Use lowercase letters and numbers, starting with a letter."; exit 1; }
+id "$U" >/dev/null 2>&1 && { zenity --error --text="That username already exists."; exit 1; }
+N=$(zenity --entry --title="Create account" --text="Full name (optional):") || exit 0
+N=${N//[:,]/ }
+P1=$(zenity --password --title="Password for $U") || exit 0
+P2=$(zenity --password --title="Repeat the password") || exit 0
+{ [ -n "$P1" ] && [ "$P1" = "$P2" ]; } || { zenity --error --text="The passwords were empty or did not match."; exit 1; }
+if zenity --question --title="Create account" --text="Make '$U' an administrator?"; then G="sudo,audio,video,plugdev,netdev"; else G="audio,video,plugdev,netdev"; fi
+if sudo -n true 2>/dev/null; then AR="sudo"; else AR="pkexec"; fi
+if printf '%s\n%s\n%s\n%s\n' "$U" "$N" "$G" "$P1" | $AR bash -c 'read -r u; read -r n; read -r g; read -r p; useradd -m -s /bin/bash -c "$n" -G "$g" "$u" && echo "$u:$p" | chpasswd'; then
+  zenity --info --no-wrap --text="Account '$U' created.\nSign out to log in with it."
+else
+  zenity --error --text="Could not create the account."
+fi

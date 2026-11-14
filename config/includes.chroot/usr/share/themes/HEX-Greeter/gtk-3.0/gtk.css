@@ -1,0 +1,5 @@
+@import url("file:///usr/share/themes/Arc-Dark/gtk-3.0/gtk.css");
+#login_window { background-color: #0e1a2b; border-radius: 22px; border: 1px solid #2a4a5e; padding: 26px; }
+#panel_window { background-color: #0b1320; }
+#login_window entry { border-radius: 12px; padding: 8px 12px; }
+#login_window button { border-radius: 12px; }
