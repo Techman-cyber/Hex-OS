@@ -11,4 +11,10 @@ done
 sed -i 's/Install Debian/Install HEX OS/g; s/^Name=.*/Name=Install HEX OS/' /usr/share/applications/install-debian.desktop 2>/dev/null || true
 sed -i 's/^PRETTY_NAME=.*/PRETTY_NAME="HEX OS (based on Debian 12)"/; s/^NAME=.*/NAME="HEX OS"/' /etc/os-release 2>/dev/null || true
 echo "HEX OS \\n \\l" > /etc/issue
+# Nexora is the browser entry: hide the plain Firefox menu entry and start Firefox on Nexora's page, without telemetry
+sed -i '0,/^\[Desktop Entry\]/s//[Desktop Entry]\nNoDisplay=true/' /usr/share/applications/firefox-esr.desktop 2>/dev/null || true
+mkdir -p /usr/lib/firefox-esr/distribution
+cat > /usr/lib/firefox-esr/distribution/policies.json <<'EOT'
+{"policies":{"DisableTelemetry":true,"DisableFirefoxStudies":true,"DontCheckDefaultBrowser":true,"NoDefaultBookmarks":true,"OverrideFirstRunPage":"","OverridePostUpdatePage":"","Homepage":{"URL":"https://techman-cyber.github.io/Nexora/","StartPage":"homepage"}}}
+EOT
 exit 0
