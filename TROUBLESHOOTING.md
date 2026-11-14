@@ -18,3 +18,10 @@ Blur can be tried from **Welcome → Blur and effects**; switch it off again if 
 ## Reporting a problem
 Open **Welcome to HEX OS → Troubleshooting report**. It saves `~/hex-diagnose.txt`.
 Send that file together with a description of what you saw.
+
+## Forgot your password / need another account
+- Linux has no "sign up" button on the login screen. Accounts are made in the installer, or later with
+  **Welcome to HEX OS → Create a new account**.
+- Forgot the password of an installed system? Boot the HEX USB, open **Welcome to HEX OS → Reset a forgotten
+  password**, pick the disk and the account, and set a new password. (Encrypted disks are not supported by this tool.)
+- Dock: **Welcome → Show / hide the dock**. It sits on the right side with big icons.

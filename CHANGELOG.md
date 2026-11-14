@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.5
+- Simpler, bigger UI: larger fonts, desktop icons, panel and terminal; the dock is now big, always visible, on the right side, with no zoom or auto-hide (it clipped and glitched in VMs).
+- Login screen shows the live credentials (user / live) in a live session, and a "forgot your password?" hint on installed systems.
+- New tools: "Reset a forgotten password" (run from the live USB) and "Create a new account", both in the Welcome app and the Applications menu.
+
 ## 0.4.1
 - Removed Synaptic (its dependency `debtags` broke the live-build package install). "Get apps" is now a small built-in installer for Debian (apt) and Flathub apps.
 - Build failures now show the error lines first, plus free disk space, in the run's annotation.

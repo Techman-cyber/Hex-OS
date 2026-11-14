@@ -24,6 +24,7 @@ lb config \
 
 cp -a "$HERE/config/." config/
 chmod -R a+rX config
+chmod 755 config/includes.chroot/etc/skel/Desktop/* 2>/dev/null || true
 chmod 755 config/includes.chroot/usr/local/bin/* config/includes.chroot/usr/local/sbin/* config/hooks/normal/* 2>/dev/null || true
 
 lb build
