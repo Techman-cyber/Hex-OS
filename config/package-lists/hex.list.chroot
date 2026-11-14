@@ -31,9 +31,9 @@ x11-xserver-utils
 libgl1-mesa-dri
 mesa-utils
 
-# Virtual machine support (VirtualBox, QEMU/KVM)
-virtualbox-guest-x11
-virtualbox-guest-utils
+# Virtual machine support (QEMU/KVM, SPICE)
+# virtualbox-guest-x11 and virtualbox-guest-utils are not available in Debian bookworm
+# and are the cause of the failed live-build package install.
 spice-vdagent
 
 # Login, keyboard and locale basics
