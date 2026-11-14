@@ -1,0 +1,4 @@
+[Default Applications]
+text/html=hex-nexora.desktop
+x-scheme-handler/http=hex-nexora.desktop
+x-scheme-handler/https=hex-nexora.desktop

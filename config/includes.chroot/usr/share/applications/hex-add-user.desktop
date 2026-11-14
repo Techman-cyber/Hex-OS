@@ -1,0 +1,6 @@
+[Desktop Entry]
+Type=Application
+Name=Create a new account
+Exec=bash /usr/local/bin/hex-add-user
+Icon=system-users
+Categories=System;Settings;

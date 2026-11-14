@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+# HEX Welcome: a friendly menu for first steps.
+while true; do
+  items=()
+  [ -d /run/live ] && items+=(install "Install HEX OS to this computer")
+  items+=(apps "Get apps (search and install)" look "Switch dark / light look" fx "Blur and effects on / off" keys "Keyboard shortcuts" backup "System snapshots (Timeshift)" ai "Set up local AI (beta)" account "Create a new account" reset "Reset a forgotten password" diag "Troubleshooting report" quit "Close")
+  C=$(zenity --list --title="Welcome to HEX OS" --text="What would you like to do?" --column=id --column="Choose" --hide-column=1 --print-column=1 --width=460 --height=520 "${items[@]}") || exit 0
+  case "$C" in
+    install) (sudo -E calamares >/dev/null 2>&1 &) ;;
+    apps) (xfce4-terminal -x bash /usr/local/bin/hex-apps >/dev/null 2>&1 &) ;;
+    look)
+      cur=$(xfconf-query -c xsettings -p /Net/ThemeName 2>/dev/null)
+      if [ "$cur" = "Arc-Dark" ]; then t=Arc; i=Papirus; else t=Arc-Dark; i=Papirus-Dark; fi
+      xfconf-query -c xsettings -p /Net/ThemeName -n -t string -s "$t"
+      xfconf-query -c xsettings -p /Net/IconThemeName -n -t string -s "$i"
+      xfconf-query -c xfwm4 -p /general/theme -n -t string -s "$t" ;;
+    account) bash /usr/local/bin/hex-add-user ;;
+    reset) bash /usr/local/bin/hex-reset-password ;;
+    fx)
+      bash /usr/local/bin/hex-fx toggle; sleep 1
+      zenity --info --no-wrap --title="Effects" --text="$(bash /usr/local/bin/hex-fx status)\n\nInside a virtual machine blur can flicker. If it does, switch it off again." ;;
+    diag) bash /usr/local/bin/hex-diagnose ;;
+    keys) zenity --info --title="Shortcuts" --text="Ctrl+Alt+T: Terminal\nAlt+F1: Application menu\nAlt+F2: Run a command\nAlt+Tab: Switch windows\nCtrl+Alt+D: Show desktop\nAlt+F4: Close window\nPrint: Screenshot" ;;
+    backup) (timeshift-launcher >/dev/null 2>&1 &) ;;
+    ai) bash /usr/local/bin/hex-ai --setup ;;
+    *) exit 0 ;;
+  esac
+done

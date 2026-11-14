@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+# Nexora on HEX. Nexora has no native Linux build yet, so HEX opens its Web Suite and AI Hub
+# in the built-in browser engine. Links you click open here too.
+URL="https://techman-cyber.github.io/Nexora/"
+if [ "$#" -gt 0 ]; then exec firefox-esr "$@"; fi
+exec firefox-esr "$URL"

@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=Nexora
+GenericName=Web Browser
+Comment=Your web, your way
+Exec=bash /usr/local/bin/hex-nexora %U
+Icon=/usr/share/icons/hicolor/256x256/apps/hex-nexora.png
+Terminal=false
+Categories=Network;WebBrowser;
+MimeType=text/html;x-scheme-handler/http;x-scheme-handler/https;
