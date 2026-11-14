@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.6
+- Removed the Plank dock (it duplicated, clipped and blocked full screen). The slim Xfce dock panel is now on the right edge, auto-hides, and has small icons.
+- Cleaner top bar (no workspace block), new modern wallpaper and login background.
+- Nexora is the browser entry (dock, menu, default web handler); Firefox is the engine behind it until Nexora has a Linux build.
+- Login screen hints: live credentials, forgot password, how to create another account.
+
 ## 0.5
 - Simpler, bigger UI: larger fonts, desktop icons, panel and terminal; the dock is now big, always visible, on the right side, with no zoom or auto-hide (it clipped and glitched in VMs).
 - Login screen shows the live credentials (user / live) in a live session, and a "forgot your password?" hint on installed systems.
