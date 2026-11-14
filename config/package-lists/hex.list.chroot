@@ -32,8 +32,6 @@ libgl1-mesa-dri
 mesa-utils
 
 # Virtual machine support (VirtualBox, QEMU/KVM)
-virtualbox-guest-x11
-virtualbox-guest-utils
 spice-vdagent
 
 # Login, keyboard and locale basics
