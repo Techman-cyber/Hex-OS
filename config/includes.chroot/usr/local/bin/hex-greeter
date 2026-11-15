@@ -1,7 +1,8 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 """HEX login screen: user, password, session, power, and Create account."""
 import os, subprocess, time
 import gi
+
 gi.require_version("Gtk", "3.0")
 gi.require_version("Gdk", "3.0")
 gi.require_version("LightDM", "1")
@@ -41,141 +42,232 @@ class Greeter(Gtk.Window):
 
         root = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
         self.add(root)
-        # top bar
-        top = Gtk.Box(); top.get_style_context().add_class("bar")
-        self.host = Gtk.Label(label=GLib.get_host_name()); top.pack_start(self.host, False, False, 0)
-        self.clock = Gtk.Label(); top.pack_end(self.clock, False, False, 0)
+
+        top = Gtk.Box()
+        top.get_style_context().add_class("bar")
+        self.host = Gtk.Label(label=GLib.get_host_name())
+        top.pack_start(self.host, False, False, 0)
+        self.clock = Gtk.Label()
+        top.pack_end(self.clock, False, False, 0)
         root.pack_start(top, False, False, 0)
-        # centre card
-        centre = Gtk.Box(); centre.set_halign(Gtk.Align.CENTER); centre.set_valign(Gtk.Align.CENTER)
+
+        centre = Gtk.Box()
+        centre.set_halign(Gtk.Align.CENTER)
+        centre.set_valign(Gtk.Align.CENTER)
         root.pack_start(centre, True, True, 0)
+
         card = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12)
-        card.get_style_context().add_class("card"); card.set_size_request(380, -1)
+        card.get_style_context().add_class("card")
+        card.set_size_request(380, -1)
         centre.pack_start(card, False, False, 0)
-        t = Gtk.Label(label="HEX OS"); t.get_style_context().add_class("title"); card.pack_start(t, False, False, 0)
-        self.stack = Gtk.Stack(); card.pack_start(self.stack, False, False, 0)
-        self.msg = Gtk.Label(); self.msg.set_line_wrap(True); self.msg.set_max_width_chars(42)
+
+        t = Gtk.Label(label="HEX OS")
+        t.get_style_context().add_class("title")
+        card.pack_start(t, False, False, 0)
+
+        self.stack = Gtk.Stack()
+        card.pack_start(self.stack, False, False, 0)
+
+        self.msg = Gtk.Label()
+        self.msg.set_line_wrap(True)
+        self.msg.set_max_width_chars(42)
         card.pack_start(self.msg, False, False, 0)
 
-        # --- login page ---
         lp = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
-        self.users = Gtk.ComboBoxText(); lp.pack_start(self.users, False, False, 0)
-        self.entry = Gtk.Entry(); self.entry.set_visibility(False); self.entry.set_placeholder_text("Password")
-        self.entry.connect("activate", self.do_login); lp.pack_start(self.entry, False, False, 0)
-        b = Gtk.Button(label="Log in"); b.get_style_context().add_class("primary"); b.connect("clicked", self.do_login)
+        self.users = Gtk.ComboBoxText()
+        lp.pack_start(self.users, False, False, 0)
+        self.entry = Gtk.Entry()
+        self.entry.set_visibility(False)
+        self.entry.set_placeholder_text("Password")
+        self.entry.connect("activate", self.do_login)
+        lp.pack_start(self.entry, False, False, 0)
+
+        b = Gtk.Button(label="Log in")
+        b.get_style_context().add_class("primary")
+        b.connect("clicked", self.do_login)
         lp.pack_start(b, False, False, 0)
-        su = Gtk.Button(label="Create a new account"); su.get_style_context().add_class("link")
-        su.connect("clicked", lambda *_: self.show_page("signup")); lp.pack_start(su, False, False, 0)
+
+        su = Gtk.Button(label="Create a new account")
+        su.get_style_context().add_class("link")
+        su.connect("clicked", lambda *_: self.show_page("signup"))
+        lp.pack_start(su, False, False, 0)
+
         hint = Gtk.Label()
-        hint.set_line_wrap(True); hint.set_max_width_chars(42); hint.get_style_context().add_class("hint")
-        hint.set_text("Live session. Username: user    Password: live" if LIVE else
-                      "Forgot your password? Boot the HEX USB, then Welcome > Reset a forgotten password.")
+        hint.set_line_wrap(True)
+        hint.set_max_width_chars(42)
+        hint.get_style_context().add_class("hint")
+        hint.set_text(
+            "Live session. Username: user    Password: live" if LIVE else
+            "Forgot your password? Boot the HEX USB, then Welcome > Reset a forgotten password."
+        )
         lp.pack_start(hint, False, False, 0)
         self.stack.add_named(lp, "login")
 
-        # --- sign-up page (inline, so it works without a window manager) ---
         sp = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
+
         def field(ph, secret=False):
-            e = Gtk.Entry(); e.set_placeholder_text(ph); e.set_visibility(not secret); sp.pack_start(e, False, False, 0); return e
+            e = Gtk.Entry()
+            e.set_placeholder_text(ph)
+            e.set_visibility(not secret)
+            sp.pack_start(e, False, False, 0)
+            return e
+
         self.f_user = field("New username (lowercase)")
         self.f_name = field("Full name (optional)")
         self.f_pw1 = field("New password", True)
         self.f_pw2 = field("Repeat the new password", True)
-        a = Gtk.Label(label="An administrator must approve new accounts:"); a.get_style_context().add_class("sub"); a.set_xalign(0)
+
+        a = Gtk.Label(label="An administrator must approve new accounts:")
+        a.get_style_context().add_class("sub")
+        a.set_xalign(0)
         sp.pack_start(a, False, False, 0)
+
         self.f_admin = field("Administrator username")
         self.f_apw = field("Administrator password", True)
         self.f_apw.connect("activate", self.do_signup)
+
         row = Gtk.Box(spacing=8)
-        cb = Gtk.Button(label="Back"); cb.get_style_context().add_class("link"); cb.connect("clicked", lambda *_: self.show_page("login"))
-        ok = Gtk.Button(label="Create account"); ok.get_style_context().add_class("primary"); ok.connect("clicked", self.do_signup)
-        row.pack_start(cb, False, False, 0); row.pack_end(ok, True, True, 0)
+        cb = Gtk.Button(label="Back")
+        cb.get_style_context().add_class("link")
+        cb.connect("clicked", lambda *_: self.show_page("login"))
+        ok = Gtk.Button(label="Create account")
+        ok.get_style_context().add_class("primary")
+        ok.connect("clicked", self.do_signup)
+        row.pack_start(cb, False, False, 0)
+        row.pack_end(ok, True, True, 0)
         sp.pack_start(row, False, False, 0)
         self.stack.add_named(sp, "signup")
 
-        # bottom bar
-        bar = Gtk.Box(spacing=10); bar.get_style_context().add_class("bar")
+        bar = Gtk.Box(spacing=10)
+        bar.get_style_context().add_class("bar")
         self.sessions = Gtk.ComboBoxText()
         self.session_keys = []
         for s in LightDM.get_sessions():
-            self.sessions.append_text(s.get_name()); self.session_keys.append(s.get_key())
+            self.sessions.append_text(s.get_name())
+            self.session_keys.append(s.get_key())
         pick = self.session_keys.index("xfce") if "xfce" in self.session_keys else 0
-        if self.session_keys: self.sessions.set_active(pick)
+        if self.session_keys:
+            self.sessions.set_active(pick)
         bar.pack_start(self.sessions, False, False, 0)
-        for label, can, fn in (("Shut down", LightDM.get_can_shutdown, LightDM.shutdown), ("Restart", LightDM.get_can_restart, LightDM.restart)):
-            btn = Gtk.Button(label=label); btn.get_style_context().add_class("barbtn")
-            btn.connect("clicked", lambda _b, f=fn: f()); btn.set_sensitive(bool(can()))
+
+        for label, can, fn in (
+            ("Shut down", LightDM.get_can_shutdown, LightDM.shutdown),
+            ("Restart", LightDM.get_can_restart, LightDM.restart),
+        ):
+            btn = Gtk.Button(label=label)
+            btn.get_style_context().add_class("barbtn")
+            btn.connect("clicked", lambda _b, f=fn: f())
+            btn.set_sensitive(bool(can()))
             bar.pack_end(btn, False, False, 0)
+
         root.pack_end(bar, False, False, 0)
 
         self.user_names = []
         for u in LightDM.UserList.get_instance().get_users():
             self.add_user(u.get_name(), u.get_display_name() or u.get_name())
-        if self.user_names: self.users.set_active(0)
-        self.tick(); GLib.timeout_add_seconds(1, self.tick)
+        if self.user_names:
+            self.users.set_active(0)
+        self.tick()
+        GLib.timeout_add_seconds(1, self.tick)
 
-    # helpers
     def add_user(self, name, display):
-        if name in self.user_names: return
-        self.user_names.append(name); self.users.append_text(display if display == name else f"{display} ({name})")
+        if name in self.user_names:
+            return
+        self.user_names.append(name)
+        self.users.append_text(display if display == name else f"{display} ({name})")
+
     def show_page(self, page):
-        self.set_msg(""); self.stack.set_visible_child_name(page)
+        self.set_msg("")
+        self.stack.set_visible_child_name(page)
         (self.entry if page == "login" else self.f_user).grab_focus()
+
     def set_msg(self, text, kind="err"):
         ctx = self.msg.get_style_context()
-        for c in ("err", "ok"): ctx.remove_class(c)
-        ctx.add_class(kind); self.msg.set_text(text)
-    def tick(self, *_):
-        self.clock.set_text(time.strftime("%a %d %b   %H:%M")); return True
+        for c in ("err", "ok"):
+            ctx.remove_class(c)
+        ctx.add_class(kind)
+        self.msg.set_text(text)
 
-    # login
+    def tick(self, *_):
+        self.clock.set_text(time.strftime("%a %d %b   %H:%M"))
+        return True
+
     def do_login(self, *_):
         i = self.users.get_active()
-        if i < 0 or i >= len(self.user_names): return
-        self.pw = self.entry.get_text(); self.set_msg("")
-        if self.greeter.get_in_authentication(): self.greeter.cancel_authentication()
+        if i < 0 or i >= len(self.user_names):
+            return
+        self.pw = self.entry.get_text()
+        self.set_msg("")
+        if self.greeter.get_in_authentication():
+            self.greeter.cancel_authentication()
         self.greeter.authenticate(self.user_names[i])
+
     def on_prompt(self, g, text, ptype):
         g.respond(self.pw)
+
     def on_message(self, g, text, mtype):
-        if text: self.set_msg(text)
+        if text:
+            self.set_msg(text)
+
     def on_done(self, g):
         if g.get_is_authenticated():
             i = self.sessions.get_active()
             key = self.session_keys[i] if 0 <= i < len(self.session_keys) else "xfce"
-            if not g.start_session_sync(key): self.set_msg("Could not start the session.")
+            if not g.start_session_sync(key):
+                self.set_msg("Could not start the session.")
         else:
             self.set_msg("Wrong password. Please try again.")
-            self.entry.set_text(""); self.entry.grab_focus()
+            self.entry.set_text("")
+            self.entry.grab_focus()
 
-    # sign up
     def do_signup(self, *_):
         u, n = self.f_user.get_text().strip(), self.f_name.get_text().strip()
         p1, p2 = self.f_pw1.get_text(), self.f_pw2.get_text()
         a, ap = self.f_admin.get_text().strip(), self.f_apw.get_text()
-        if not u or not p1 or not a or not ap: return self.set_msg("Please fill in every field except the full name.")
-        if p1 != p2: return self.set_msg("The two new passwords do not match.")
+        if not u or not p1 or not a or not ap:
+            return self.set_msg("Please fill in every field except the full name.")
+        if p1 != p2:
+            return self.set_msg("The two new passwords do not match.")
         try:
-            r = subprocess.run(["sudo", "-n", "/usr/local/sbin/hex-signup-helper"],
-                               input="\n".join([u, n, p1, a, ap]) + "\n", capture_output=True, text=True, timeout=40)
+            r = subprocess.run(
+                ["sudo", "-n", "/usr/local/sbin/hex-signup-helper"],
+                input="\n".join([u, n, p1, a, ap]) + "\n",
+                capture_output=True,
+                text=True,
+                timeout=40,
+            )
             out = r.stdout.strip()
         except Exception:
             out = ""
         if out.startswith("OK"):
-            self.add_user(u, n or u); self.users.set_active(self.user_names.index(u))
-            for e in (self.f_user, self.f_name, self.f_pw1, self.f_pw2, self.f_admin, self.f_apw): e.set_text("")
-            self.show_page("login"); self.set_msg(f"Account '{u}' is ready. Enter its password to log in.", "ok")
+            self.add_user(u, n or u)
+            self.users.set_active(self.user_names.index(u))
+            for e in (self.f_user, self.f_name, self.f_pw1, self.f_pw2, self.f_admin, self.f_apw):
+                e.set_text("")
+            self.show_page("login")
+            self.set_msg(f"Account '{u}' is ready. Enter its password to log in.", "ok")
         else:
             self.set_msg(out[4:] if out.startswith("ERR ") else "Could not create the account.")
 
 def main():
-    prov = Gtk.CssProvider(); prov.load_from_data(CSS)
+    prov = Gtk.CssProvider()
+    prov.load_from_data(CSS)
     Gtk.StyleContext.add_provider_for_screen(Gdk.Screen.get_default(), prov, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
     st = Gtk.Settings.get_default()
-    for k, v in (("gtk-theme-name", "Arc-Dark"), ("gtk-icon-theme-name", "Papirus-Dark"), ("gtk-font-name", "Inter 11"), ("gtk-cursor-theme-name", "HEX-Cursor")):
-        try: st.set_property(k, v)
-        except Exception: pass
-    w = Greeter(); w.show_all(); w.entry.grab_focus(); Gtk.main()
+    for k, v in (
+        ("gtk-theme-name", "Arc-Dark"),
+        ("gtk-icon-theme-name", "Papirus-Dark"),
+        ("gtk-font-name", "Inter 11"),
+        ("gtk-cursor-theme-name", "HEX-Cursor"),
+    ):
+        try:
+            st.set_property(k, v)
+        except Exception:
+            pass
+    w = Greeter()
+    w.show_all()
+    w.entry.grab_focus()
+    Gtk.main()
 
 if __name__ == "__main__":
     main()
