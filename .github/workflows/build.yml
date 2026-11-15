@@ -11,13 +11,15 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
-    # A real Debian 12 container, so the ISO is built with Debian's own (modern) live-build.
     container:
       image: debian:bookworm
       options: --privileged
+
     steps:
       - name: Install tools
-        run: apt-get update && apt-get install -y git ca-certificates
+        run: |
+          apt-get update
+          apt-get install -y git ca-certificates python3
 
       - uses: actions/checkout@v4
 
@@ -25,9 +27,23 @@ jobs:
         shell: bash
         run: |
           bash -n build.sh
-          for f in config/includes.chroot/usr/local/bin/* config/hooks/normal/*; do
-            [ -e "$f" ] && bash -n "$f"
-          done
+
+          while IFS= read -r -d '' f; do
+            [ -e "$f" ] || continue
+            first="$(head -n 1 "$f" 2>/dev/null || true)"
+            if [[ "$first" == '#!'* ]]; then
+              if echo "$first" | grep -Eq '(/bash|/sh)$|/env[[:space:]]+(bash|sh)$'; then
+                bash -n "$f"
+              elif echo "$first" | grep -Eq 'python([0-9.]*)?$|/env[[:space:]]+python([0-9.]*)?$'; then
+                python3 -m py_compile "$f"
+              fi
+            fi
+          done < <(find config/includes.chroot -type f -print0)
+
+          while IFS= read -r -d '' f; do
+            [ -e "$f" ] || continue
+            bash -n "$f"
+          done < <(find config/hooks/normal -type f -print0)
 
       - name: Package check (advisory, never blocks)
         continue-on-error: true
