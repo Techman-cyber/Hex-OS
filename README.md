@@ -4,10 +4,10 @@ A free, good-looking, easy operating system. Based on **Debian 12** with the **X
 
 - **Easy:** normal desktop, normal installer (Calamares), works in virtual machines
 - **Crazy looking:** dark Arc theme, generated hex wallpaper, Papirus icons, window shadows and transparency
-- **Simple and clear:** a clean top bar and a slim auto-hiding dock on the right (the web icon is Nexora)
+- **Familiar like Windows, nicer:** a bottom taskbar, a Start menu with search (click it or press the Windows key), a yellow custom cursor
 - **Private and safe:** no telemetry added by HEX, firewall (ufw), AppArmor, automatic security updates
 - **Recovery:** Timeshift system snapshots
-- **Apps:** Firefox, Thunar files, terminal, a simple app installer for Debian apps and Flatpak/Flathub
+- **Apps:** Firefox, Thunar files, terminal, LibreOffice (Writer, Calc, Impress, opens Word/Excel/PowerPoint files), Notepad, Paint, VLC, PDF viewer, Task Manager, plus an app installer for Debian apps and Flatpak/Flathub
 - **Welcome app:** first-run menu (install, apps, look, shortcuts, snapshots)
 - **Local AI (beta):** optional. Downloads a small model that runs on your own computer, only if you ask
 

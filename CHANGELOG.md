@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.7
+- Windows-style layout: one taskbar at the bottom, Start menu with search (Windows key), smaller icons.
+- New HEX login screen with **Create a new account** (admin-approved) and a safe fallback to the standard login screen.
+- Preinstalled apps: LibreOffice, Notepad, Paint, VLC, PDF viewer, Task Manager.
+- Custom yellow cursor theme (arrow, pointing hand, grab hand, text).
+- Removed the Nexora entry from the OS; Firefox is the browser.
+
 ## 0.6
 - Removed the Plank dock (it duplicated, clipped and blocked full screen). The slim Xfce dock panel is now on the right edge, auto-hides, and has small icons.
 - Cleaner top bar (no workspace block), new modern wallpaper and login background.
