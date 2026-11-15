@@ -31,9 +31,8 @@ x11-xserver-utils
 libgl1-mesa-dri
 mesa-utils
 
-# Virtual machine support (VirtualBox, QEMU/KVM)
-virtualbox-guest-x11
-virtualbox-guest-utils
+# Virtual machine support. (VirtualBox Guest Additions are not in Debian 12, so only QEMU/KVM tools are listed.
+# The kernel already has the VirtualBox graphics and guest drivers built in.)
 spice-vdagent
 
 # Login, keyboard and locale basics
