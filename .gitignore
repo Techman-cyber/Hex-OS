@@ -2,3 +2,4 @@ out/
 build/
 *.iso
 build.log
+lb-build.log
