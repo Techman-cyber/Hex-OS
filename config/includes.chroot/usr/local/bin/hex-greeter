@@ -3,13 +3,16 @@
 exec python3 "$0" "$@"
 ' '''
 """HEX login screen: big clock, user card, password, session, power, and Create account."""
-import os, subprocess, time
+import os
+import subprocess
+import time
+
 import gi
 
 gi.require_version("Gtk", "3.0")
 gi.require_version("Gdk", "3.0")
 gi.require_version("LightDM", "1")
-from gi.repository import Gtk, Gdk, GLib, LightDM
+from gi.repository import Gdk, GLib, Gtk, LightDM
 
 LIVE = os.path.isdir("/run/live")
 CSS = b"""
@@ -42,11 +45,14 @@ class Greeter(Gtk.Window):
         self.greeter.connect("authentication-complete", self.on_done)
         if not self.greeter.connect_to_daemon_sync():
             raise SystemExit(1)
+
         self.pw = ""
-        self.user_names, self.user_display = [], {}
+        self.user_names = []
+        self.user_display = {}
         self.set_decorated(False)
-        scr = Gdk.Screen.get_default()
-        self.set_default_size(scr.get_width(), scr.get_height())
+
+        screen = Gdk.Screen.get_default()
+        self.set_default_size(screen.get_width(), screen.get_height())
         self.move(0, 0)
 
         root = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
