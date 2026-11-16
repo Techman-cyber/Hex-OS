@@ -26,7 +26,7 @@ jobs:
         run: |
           bash -n build.sh
           for f in config/includes.chroot/usr/local/bin/* config/hooks/normal/*; do
-            [ -e "$f" ] && bash -n "$f"
+            [ -e "$f" ] && [ -f "$f" ] && bash -n "$f"
           done
 
       - name: Package check (advisory, never blocks)
