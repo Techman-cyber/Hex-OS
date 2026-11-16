@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+# HEX AI (beta): ask a model that runs on this computer. The download is opt-in.
+MODEL="${HEX_MODEL:-llama3.2:1b}"
+setup() {
+  if command -v ollama >/dev/null 2>&1; then zenity --info --text="Local AI is already set up."; return; fi
+  zenity --question --title="HEX AI (beta)" --text="This downloads Ollama from ollama.com and a small model (about 2 GB). It needs internet and free disk space. Continue?" || return
+  xfce4-terminal -x bash -c "curl -fsSL https://ollama.com/install.sh | sh && ollama pull $MODEL; read -rp 'Finished. Press Enter to close.'"
+}
+[ "${1:-}" = "--setup" ] && { setup; exit 0; }
+command -v ollama >/dev/null 2>&1 || { setup; command -v ollama >/dev/null 2>&1 || exit 0; }
+curl -s -m 2 http://127.0.0.1:11434/ >/dev/null 2>&1 || { (ollama serve >/dev/null 2>&1 &); sleep 3; }
+while Q=$(zenity --entry --title="HEX AI (beta)" --text="Ask HEX AI (it runs on your computer):") && [ -n "$Q" ]; do
+  A=$(jq -n --arg m "$MODEL" --arg q "$Q" '{model:$m,stream:false,messages:[{role:"system",content:"You are HEX AI inside HEX OS. Be short and clear."},{role:"user",content:$q}]}' \
+      | curl -s -m 300 http://127.0.0.1:11434/api/chat -d @- | jq -r '.message.content // "No answer. Is the model installed?"')
+  zenity --info --title="HEX AI" --no-wrap --text="$A"
+done

@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+# HEX apps: search and install software from Debian (apt) or Flathub (Flatpak). Runs in a terminal.
+echo "=== HEX apps ==="
+echo "1) Debian apps (apt)"
+echo "2) Flathub apps (Flatpak)"
+echo "3) Open Flathub website"
+read -rp "Choose 1, 2 or 3: " c
+case "$c" in
+  1)
+    read -rp "Search for: " q
+    apt-cache search "$q" | head -30
+    read -rp "Package to install (empty = cancel): " p
+    [ -n "$p" ] && sudo apt-get install -y "$p" ;;
+  2)
+    flatpak remote-add --if-not-exists --user flathub https://flathub.org/repo/flathub.flatpakrepo 2>/dev/null
+    read -rp "Search for: " q
+    flatpak search "$q" | head -25
+    read -rp "Application ID to install, e.g. org.videolan.VLC (empty = cancel): " a
+    [ -n "$a" ] && flatpak install --user -y flathub "$a" ;;
+  3) xdg-open https://flathub.org/ ;;
+esac
+read -rp "Press Enter to close." _

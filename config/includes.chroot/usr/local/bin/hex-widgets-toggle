@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+# Opens the widgets panel, or closes it if it is already open (taskbar button, Win+W).
+if pkill -f "python3 /usr/local/bin/hex-widgets"; then exit 0; fi
+F="/tmp/.hex-widgets-closed-$(id -u)"
+if [ -f "$F" ] && [ $(( $(date +%s) - $(stat -c %Y "$F") )) -lt 1 ]; then exit 0; fi   # it just closed itself because you clicked the button
+exec python3 /usr/local/bin/hex-widgets

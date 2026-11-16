@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Install HEX OS
+Comment=Install HEX OS to your computer
+Exec=sudo -E calamares
+Icon=system-software-install
+Terminal=false
+Categories=System;
