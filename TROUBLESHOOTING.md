@@ -13,6 +13,8 @@
 Recommended settings: **Display → Graphics Controller: VMSVGA**, **Video memory: 128 MB**,
 **Enable 3D Acceleration: off**, **System → Enable EFI: off**, 4 GB RAM or more.
 HEX uses the safe modesetting driver without GL acceleration in virtual machines, and turns blur off there.
+VirtualBox Guest Additions are not part of Debian 12, so the screen does not resize by itself in VirtualBox:
+set the resolution in **Settings -> Display**, and copy/paste between your PC and the VM is not available.
 Blur can be tried from **Welcome → Blur and effects**; switch it off again if it flickers.
 
 ## Reporting a problem
@@ -37,3 +39,18 @@ A live USB has no accounts yet, so it needs one to log in: `user` / `live`. It h
 for admin tasks) only so the **Install HEX OS** button can start the installer. This exists only in the live
 session in memory. An installed HEX OS has **no** `user` account and **no** auto-login: you choose your own
 username and password in the installer.
+
+## Wi-Fi
+- Wi-Fi works through the network icon in the taskbar tray (or **Welcome -> Wi-Fi and network**). The Wi-Fi support software
+  (`wpasupplicant`) and common Wi-Fi firmware are included.
+- **In a virtual machine you will only see Ethernet.** VirtualBox and similar programs give the VM a wired adapter and no Wi-Fi.
+  Test Wi-Fi on a real computer (USB boot), or give the VM a USB Wi-Fi adapter.
+
+## Weather and news
+- Press **Win+W** or click the cloud button on the taskbar. Type your city once. Weather comes from open-meteo.com (free, no account);
+  headlines come from BBC World, Hacker News and NASA. Nothing is contacted until you open the panel or set a city.
+- Edit the news sources in `~/.config/hex-widgets.json` (the `feeds` list).
+
+## Sounds, animations and boot screen
+- **Welcome -> Sounds on / off**, **Welcome -> Animations and effects** (Smooth, Glass, Off).
+- The boot animation is a Plymouth theme at `/usr/share/plymouth/themes/hex`.

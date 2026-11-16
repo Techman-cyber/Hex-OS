@@ -5,6 +5,8 @@ A free, good-looking, easy operating system. Based on **Debian 12** with the **X
 - **Easy:** normal desktop, normal installer (Calamares), works in virtual machines
 - **Crazy looking:** dark Arc theme, generated hex wallpaper, Papirus icons, window shadows and transparency
 - **Familiar like Windows, nicer:** a bottom taskbar, a Start menu with search (click it or press the Windows key), a yellow custom cursor
+- **Widgets (like Windows 11, free of accounts):** weather, calendar and news in a panel above the taskbar (Win+W), plus the temperature on the taskbar
+- **Polish:** startup sound and event sounds, a boot animation, fade animations for windows, a redesigned login screen
 - **Private and safe:** no telemetry added by HEX, firewall (ufw), AppArmor, automatic security updates
 - **Recovery:** Timeshift system snapshots
 - **Apps:** Firefox, Thunar files, terminal, LibreOffice (Writer, Calc, Impress, opens Word/Excel/PowerPoint files), Notepad, Paint, VLC, PDF viewer, Task Manager, plus an app installer for Debian apps and Flatpak/Flathub

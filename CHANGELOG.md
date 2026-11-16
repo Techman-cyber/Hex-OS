@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.8
+- Widgets panel (Win+W): weather (Open-Meteo), calendar and news (RSS); weather text on the taskbar.
+- Sounds: startup chime, system event sounds, on/off switch. Boot animation (Plymouth) with progress bar.
+- Window fade animations (Smooth mode, works in VMs) and Glass mode (blur) with a chooser in the Welcome app.
+- New login screen: big clock, avatar, smoother transitions, password reveal button.
+- Wi-Fi support software added (wpasupplicant, iw, rfkill, regulatory data).
+- Build now skips packages that do not exist in Debian 12 (with a loud warning) instead of failing.
+
+## 0.7.1
+- Build fix: removed `virtualbox-guest-x11` and `virtualbox-guest-utils` from the package list. They do not exist in Debian 12 and stopped the ISO build.
+
 ## 0.7
 - Windows-style layout: one taskbar at the bottom, Start menu with search (Windows key), smaller icons.
 - New HEX login screen with **Create a new account** (admin-approved) and a safe fallback to the standard login screen.

@@ -20,14 +20,24 @@ lb config \
   --apt-recommends false --memtest none --win32-loader false \
   --chroot-squashfs-compression-type xz \
   --iso-application "HEX OS" --iso-publisher "HEX OS" --iso-volume "HEX_OS" \
-  --bootappend-live "boot=live components quiet hostname=hex username=user locales=en_US.UTF-8 keyboard-layouts=us timezone=UTC"
+  --bootappend-live "boot=live components quiet splash hostname=hex username=user locales=en_US.UTF-8 keyboard-layouts=us timezone=UTC"
 
 cp -a "$HERE/config/." config/
 chmod -R a+rX config
 chmod 755 config/includes.chroot/etc/skel/Desktop/* 2>/dev/null || true
 chmod 755 config/includes.chroot/usr/local/bin/* config/includes.chroot/usr/local/sbin/* config/hooks/normal/* 2>/dev/null || true
 
-lb build
+if ! lb build 2>&1 | tee "$HERE/lb-build.log"; then
+  MISSING=$(grep -o 'Unable to locate package [^ ]*' "$HERE/lb-build.log" | awk '{print $5}' | sort -u || true)
+  if [ -n "$MISSING" ]; then
+    echo "HEX WARNING: these packages do not exist in Debian 12 and will be skipped: $(echo $MISSING | tr '\n' ' ')"
+    for p in $MISSING; do sed -i "/^$p\$/d" config/package-lists/hex.list.chroot; done
+    lb clean
+    lb build
+  else
+    exit 1
+  fi
+fi
 
 ISO="$HERE/out/hex-os.iso"
 mv live-image-amd64.hybrid.iso "$ISO"
