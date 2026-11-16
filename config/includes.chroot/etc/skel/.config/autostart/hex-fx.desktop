@@ -1,0 +1,5 @@
+[Desktop Entry]
+Type=Application
+Name=HEX effects
+Exec=bash /usr/local/bin/hex-fx auto
+X-GNOME-Autostart-enabled=true
