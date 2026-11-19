@@ -17,7 +17,7 @@ jobs:
       options: --privileged
     steps:
       - name: Install tools
-        run: apt-get update && apt-get install -y git ca-certificates
+        run: apt-get update && apt-get install -y git ca-certificates python3
 
       - uses: actions/checkout@v4
 
@@ -25,9 +25,15 @@ jobs:
         shell: bash
         run: |
           bash -n build.sh
-          for f in config/includes.chroot/usr/local/bin/* config/hooks/normal/*; do
-            [ -e "$f" ] && [ -f "$f" ] && bash -n "$f"
+          fail=0
+          for f in config/includes.chroot/usr/local/bin/* config/includes.chroot/usr/local/sbin/* config/hooks/normal/* scripts/*; do
+            [ -f "$f" ] || continue
+            case "$(head -n 1 "$f")" in
+              *python*) python3 -c 'import sys; compile(open(sys.argv[1]).read(), sys.argv[1], "exec")' "$f" || { echo "PYTHON SYNTAX ERROR in $f"; fail=1; } ;;
+              *) bash -n "$f" || { echo "SHELL SYNTAX ERROR in $f"; fail=1; } ;;
+            esac
           done
+          exit $fail
 
       - name: Package check (advisory, never blocks)
         continue-on-error: true
