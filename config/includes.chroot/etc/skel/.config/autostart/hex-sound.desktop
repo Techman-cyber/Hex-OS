@@ -1,5 +1,0 @@
-[Desktop Entry]
-Type=Application
-Name=HEX startup sound
-Exec=bash -c "sleep 3; bash /usr/local/bin/hex-sound startup"
-X-GNOME-Autostart-enabled=true
