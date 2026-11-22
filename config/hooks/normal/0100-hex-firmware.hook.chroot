@@ -1,0 +1,7 @@
+#!/bin/sh
+# Wi-Fi and hardware firmware. Best effort: a missing package never stops the build.
+apt-get update >/dev/null 2>&1 || true
+for p in firmware-iwlwifi firmware-realtek firmware-atheros firmware-misc-nonfree; do
+  apt-get install -y --no-install-recommends "$p" || echo "HEX: skipped $p (not available)"
+done
+exit 0

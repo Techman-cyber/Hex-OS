@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=X-GNOME-Metatheme
+Name=HEX-Greeter
+Comment=HEX OS login screen
+Encoding=UTF-8
+
+[X-GNOME-Metatheme]
+GtkTheme=HEX-Greeter

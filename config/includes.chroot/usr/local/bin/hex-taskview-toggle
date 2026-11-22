@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+# Win+Tab: opens Task View, or closes it if it is already open.
+if pkill -f "python3 /usr/local/bin/hex-taskview"; then exit 0; fi
+exec python3 /usr/local/bin/hex-taskview
