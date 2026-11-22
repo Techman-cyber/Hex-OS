@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<channel name="xfce4-keyboard-shortcuts" version="1.0">
+  <property name="commands" type="empty">
+    <property name="custom" type="empty">
+      <property name="override" type="bool" value="true"/>
+      <property name="Super_L" type="string" value="xfce4-popup-whiskermenu"/>
+      <property name="&lt;Super&gt;Tab" type="string" value="bash /usr/local/bin/hex-taskview-toggle"/>
+      <property name="&lt;Super&gt;e" type="string" value="thunar"/>
+      <property name="&lt;Super&gt;w" type="string" value="bash /usr/local/bin/hex-widgets-toggle"/>
+      <property name="&lt;Super&gt;a" type="string" value="bash /usr/local/bin/hex-quick-toggle"/>
+      <property name="&lt;Super&gt;v" type="string" value="xfce4-popup-clipman"/>
+      <property name="&lt;Super&gt;l" type="string" value="xflock4"/>
+      <property name="&lt;Super&gt;r" type="string" value="xfce4-appfinder --collapsed"/>
+      <property name="&lt;Super&gt;&lt;Shift&gt;s" type="string" value="xfce4-screenshooter -r -c"/>
+    </property>
+  </property>
+  <property name="xfwm4" type="empty">
+    <property name="custom" type="empty">
+      <property name="override" type="bool" value="true"/>
+      <property name="&lt;Primary&gt;&lt;Super&gt;Left" type="string" value="left_workspace_key"/>
+      <property name="&lt;Primary&gt;&lt;Super&gt;Right" type="string" value="right_workspace_key"/>
+      <property name="&lt;Primary&gt;&lt;Super&gt;&lt;Shift&gt;Left" type="string" value="move_window_left_workspace_key"/>
+      <property name="&lt;Primary&gt;&lt;Super&gt;&lt;Shift&gt;Right" type="string" value="move_window_right_workspace_key"/>
+      <property name="&lt;Primary&gt;&lt;Super&gt;d" type="string" value="add_workspace_key"/>
+      <property name="&lt;Primary&gt;&lt;Super&gt;F4" type="string" value="del_workspace_key"/>
+      <property name="&lt;Super&gt;Left" type="string" value="tile_left_key"/>
+      <property name="&lt;Super&gt;Right" type="string" value="tile_right_key"/>
+      <property name="&lt;Super&gt;Up" type="string" value="maximize_window_key"/>
+      <property name="&lt;Super&gt;Down" type="string" value="hide_window_key"/>
+      <property name="&lt;Super&gt;d" type="string" value="show_desktop_key"/>
+    </property>
+  </property>
+</channel>
