@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.9
+- Task View (Win+Tab) with virtual desktops; Windows-style shortcuts (Win+Arrows snapping, Ctrl+Win+Left/Right, Win+V, Win+Shift+S, Win+L, Win+A, Win+D, Win+E).
+- Quick Settings panel (Win+A): Wi-Fi, Bluetooth, focus mode, night light, dark mode, animations, volume, brightness, screenshot, wallpaper, lock, power.
+- Widgets panel gets a System card (CPU, memory, disk, battery, uptime).
+- Sound fix: sound utilities installed, audio is unmuted at login, a "Test the sound" tool explains missing devices.
+- Login screen v3: animated background, lock screen with big clock, avatar picker, shake on wrong password, Caps Lock warning, battery.
+- Three more wallpapers (sunset, graphite, ocean) and a wallpaper switcher.
+- Clipboard history and screen lock (light-locker) included.
+
 ## 0.8
 - Widgets panel (Win+W): weather (Open-Meteo), calendar and news (RSS); weather text on the taskbar.
 - Sounds: startup chime, system event sounds, on/off switch. Boot animation (Plymouth) with progress bar.

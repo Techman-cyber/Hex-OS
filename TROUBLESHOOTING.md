@@ -54,3 +54,15 @@ username and password in the installer.
 ## Sounds, animations and boot screen
 - **Welcome -> Sounds on / off**, **Welcome -> Animations and effects** (Smooth, Glass, Off).
 - The boot animation is a Plymouth theme at `/usr/share/plymouth/themes/hex`.
+
+## Virtual desktops and shortcuts
+- **Win+Tab** opens Task View: every window on every desktop. Click a window to jump to it, right-click for "Move to Desktop" or "Close".
+  **+ New desktop** adds one. There are 3 desktops by default.
+- **Ctrl+Win+Left/Right** switch desktop, **Ctrl+Win+Shift+Left/Right** move the current window with you, **Ctrl+Win+D** new desktop, **Ctrl+Win+F4** close the current one.
+- **Win+Left/Right** snap a window to half the screen (or drag it to a screen edge), **Win+Up** maximise, **Win+Down** minimise.
+- **Win+V** clipboard history, **Win+Shift+S** screenshot of an area (copied to the clipboard), **Win+L** lock, **Win+A** Quick settings.
+
+## No sound?
+- Open **Welcome -> Test the sound**. It plays the chime and tells you what is missing.
+- In VirtualBox, audio is off unless you tick **Settings -> Audio -> Enable Audio** (shut the VM down first). Real computers need no setting.
+- The speaker icon in the tray opens the mixer; **Quick settings (Win+A)** has a volume slider and mute button.
