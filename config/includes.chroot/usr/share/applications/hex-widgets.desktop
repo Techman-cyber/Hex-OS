@@ -1,8 +1,0 @@
-[Desktop Entry]
-Type=Application
-Name=Widgets (Weather and News)
-Comment=Weather, calendar and news
-Exec=bash /usr/local/bin/hex-widgets-toggle
-Icon=weather-few-clouds
-Categories=Utility;
-Keywords=weather;news;calendar;widgets;

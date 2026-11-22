@@ -1,5 +1,0 @@
-[Desktop Entry]
-Name=HEX Greeter
-Comment=HEX OS login screen
-Exec=/usr/local/bin/hex-greeter-wrapper
-Type=Application
