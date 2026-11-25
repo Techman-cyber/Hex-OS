@@ -1,8 +1,0 @@
-#!/usr/bin/env bash
-# Wakes up the sound system: waits for PulseAudio, unmutes, sets a comfortable volume.
-for i in $(seq 1 20); do pactl info >/dev/null 2>&1 && break; sleep 0.5; done
-pactl info >/dev/null 2>&1 || exit 0
-pactl set-sink-mute @DEFAULT_SINK@ 0 2>/dev/null
-pactl set-sink-volume @DEFAULT_SINK@ 75% 2>/dev/null
-for c in Master Speaker Headphone PCM; do amixer -q -c 0 sset "$c" 80% unmute 2>/dev/null; done
-exit 0

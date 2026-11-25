@@ -1,6 +1,0 @@
-#!/usr/bin/env bash
-# Win+A: opens Quick Settings, or closes it if it is already open.
-if pkill -f "python3 /usr/local/bin/hex-quick"; then exit 0; fi
-F="/tmp/.hex-quick-closed-$(id -u)"
-if [ -f "$F" ] && [ $(( $(date +%s) - $(stat -c %Y "$F") )) -lt 1 ]; then exit 0; fi
-exec python3 /usr/local/bin/hex-quick
