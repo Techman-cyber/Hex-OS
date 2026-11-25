@@ -1,0 +1,160 @@
+#!/usr/bin/python3
+"""HEX Task View (Win+Tab): your virtual desktops across the top, the windows of the chosen desktop below."""
+import time
+import cairo
+import gi
+gi.require_version("Gtk", "3.0"); gi.require_version("Gdk", "3.0"); gi.require_version("Wnck", "3.0")
+from gi.repository import Gtk, Gdk, GLib, GdkPixbuf, Wnck
+
+CSS = b"""
+window { background-color: #070d17; }
+.title { font-size: 28px; font-weight: 300; color: #f2f7fb; }
+.sect { font-size: 12px; font-weight: 700; color: #96ebcd; letter-spacing: 1px; }
+.desk { background-image: none; background-color: rgba(23,40,61,0.85); border: 2px solid #2a4a5e; border-radius: 16px; padding: 12px 14px; min-width: 210px; min-height: 96px; }
+.desk:hover { background-color: #1f3a55; }
+.desk.sel { border-color: #19b0a1; background-color: #1b3550; }
+.deskname { font-size: 15px; font-weight: 700; color: #ecf4fa; }
+.deskcount { font-size: 12px; color: #9fb3c8; }
+.here { font-size: 11px; font-weight: 700; color: #19b0a1; }
+.card { background-image: none; background-color: rgba(23,40,61,0.85); border: 1px solid #2a4a5e; border-radius: 16px; padding: 14px; min-width: 200px; }
+.card:hover { background-color: #1f3a55; border-color: #19b0a1; }
+.wname { font-size: 13px; color: #ecf4fa; }
+.wapp { font-size: 11px; color: #9fb3c8; }
+.empty { font-size: 15px; color: #8aa2b8; }
+button.act { background-image: none; background-color: #14968a; color: #ffffff; border-radius: 12px; border: none; min-height: 38px; padding: 0 18px; font-weight: 700; }
+button.act:hover { background-color: #19b0a1; }
+button.ghost { background-image: none; background-color: rgba(255,255,255,0.08); color: #ecf4fa; border-radius: 12px; border: none; min-height: 38px; padding: 0 16px; }
+button.ghost:hover { background-color: rgba(255,255,255,0.16); }
+button.link { background: none; border: none; box-shadow: none; color: #96ebcd; }
+"""
+
+def stamp(): return Gtk.get_current_event_time() or int(time.time())
+
+class TaskView(Gtk.Window):
+    def __init__(self):
+        super().__init__(title="HEX Task View")
+        self.wnck = Wnck.Screen.get_default(); self.wnck.force_update()
+        act = self.wnck.get_active_workspace(); self.sel = act.get_number() if act else 0
+        self.set_app_paintable(True); self.connect("draw", self.on_draw)
+        self.set_decorated(False); self.set_keep_above(True); self.fullscreen()
+        outer = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=18); outer.set_border_width(40); self.add(outer)
+        head = Gtk.Box(spacing=10); outer.pack_start(head, False, False, 0)
+        t = Gtk.Label(label="Task view"); t.get_style_context().add_class("title"); head.pack_start(t, False, False, 0)
+        x = Gtk.Button(label="✕  Close"); x.get_style_context().add_class("ghost"); x.connect("clicked", lambda *_: self.close_now()); head.pack_end(x, False, False, 0)
+        add = Gtk.Button(label="+  New desktop"); add.get_style_context().add_class("act"); add.connect("clicked", self.add_desktop); head.pack_end(add, False, False, 10)
+        l1 = Gtk.Label(label="DESKTOPS"); l1.set_xalign(0); l1.get_style_context().add_class("sect"); outer.pack_start(l1, False, False, 0)
+        sc1 = Gtk.ScrolledWindow(); sc1.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.NEVER); outer.pack_start(sc1, False, False, 0)
+        self.strip = Gtk.Box(spacing=14); sc1.add(self.strip)
+        bar = Gtk.Box(spacing=10); outer.pack_start(bar, False, False, 0)
+        self.l2 = Gtk.Label(); self.l2.set_xalign(0); self.l2.get_style_context().add_class("sect"); bar.pack_start(self.l2, False, False, 0)
+        self.go = Gtk.Button(label="Go to this desktop"); self.go.get_style_context().add_class("link"); self.go.connect("clicked", self.go_desktop); bar.pack_end(self.go, False, False, 0)
+        self.rm = Gtk.Button(label="Remove this desktop"); self.rm.get_style_context().add_class("link"); self.rm.connect("clicked", self.remove_last); bar.pack_end(self.rm, False, False, 0)
+        sc2 = Gtk.ScrolledWindow(); sc2.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC); outer.pack_start(sc2, True, True, 0)
+        self.rev = Gtk.Revealer(); self.rev.set_transition_type(Gtk.RevealerTransitionType.CROSSFADE); self.rev.set_transition_duration(280); sc2.add(self.rev)
+        self.body = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10); self.rev.add(self.body)
+        self.connect("key-press-event", self.on_key); self.connect("destroy", lambda *_: Gtk.main_quit())
+        self.shown_at = time.time(); self.connect("focus-out-event", lambda *_: GLib.timeout_add(300, self.maybe_close))
+        self.build(); self.show_all(); self.present(); GLib.timeout_add(60, lambda: (self.rev.set_reveal_child(True), False)[1])
+
+    def on_draw(self, w, cr):
+        W, H = w.get_allocated_width(), w.get_allocated_height()
+        g = cairo.LinearGradient(0, 0, 0, H); g.add_color_stop_rgb(0, 0.027, 0.051, 0.090); g.add_color_stop_rgb(1, 0.035, 0.105, 0.130); cr.set_source(g); cr.paint()
+        for cx, cy, r, c in ((0.9, 0.1, 0.5, (0.35, 0.25, 0.9)), (0.1, 0.95, 0.5, (0.08, 0.7, 0.62))):
+            rg = cairo.RadialGradient(cx * W, cy * H, 0, cx * W, cy * H, r * max(W, H)); rg.add_color_stop_rgba(0, c[0], c[1], c[2], 0.20); rg.add_color_stop_rgba(1, c[0], c[1], c[2], 0); cr.set_source(rg); cr.paint()
+        return False
+    def on_key(self, w, e):
+        if e.keyval == Gdk.KEY_Escape: self.close_now()
+        elif e.keyval in (Gdk.KEY_Left, Gdk.KEY_Right):
+            n = self.wnck.get_workspace_count(); self.sel = (self.sel + (1 if e.keyval == Gdk.KEY_Right else -1)) % n; self.build()
+        elif e.keyval in (Gdk.KEY_Return, Gdk.KEY_KP_Enter): self.go_desktop()
+        return True
+    def maybe_close(self):
+        if time.time() - self.shown_at > 1.0 and not self.is_active(): self.close_now()
+        return False
+    def close_now(self): self.destroy(); return False
+
+    def windows(self):
+        out = []
+        for w in self.wnck.get_windows():
+            if w.is_skip_tasklist() or w.get_name() == "HEX Task View": continue
+            if w.get_window_type() not in (Wnck.WindowType.NORMAL, Wnck.WindowType.DIALOG, Wnck.WindowType.UTILITY): continue
+            out.append(w)
+        return out
+    def on_ws(self, w, n): return w.get_workspace() is not None and w.get_workspace().get_number() == n
+
+    def build(self):
+        for c in self.strip.get_children(): self.strip.remove(c)
+        for c in self.body.get_children(): self.body.remove(c)
+        spaces = self.wnck.get_workspaces(); wins = self.windows(); act = self.wnck.get_active_workspace(); cur = act.get_number() if act else 0
+        self.sel = min(self.sel, len(spaces) - 1)
+        for ws in spaces:
+            n = ws.get_number(); mine = [w for w in wins if self.on_ws(w, n)]
+            b = Gtk.Button(); b.set_relief(Gtk.ReliefStyle.NONE); b.get_style_context().add_class("desk")
+            if n == self.sel: b.get_style_context().add_class("sel")
+            v = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
+            top = Gtk.Box(spacing=8)
+            nm = Gtk.Label(label="Desktop %d" % (n + 1)); nm.get_style_context().add_class("deskname"); top.pack_start(nm, False, False, 0)
+            if n == cur: hh = Gtk.Label(label="YOU ARE HERE"); hh.get_style_context().add_class("here"); top.pack_end(hh, False, False, 0)
+            v.pack_start(top, False, False, 0)
+            cnt = Gtk.Label(label="%d window%s" % (len(mine), "" if len(mine) == 1 else "s")); cnt.set_xalign(0); cnt.get_style_context().add_class("deskcount"); v.pack_start(cnt, False, False, 0)
+            icons = Gtk.Box(spacing=4)
+            for w in mine[:6]:
+                ic = w.get_mini_icon()
+                if ic: icons.pack_start(Gtk.Image.new_from_pixbuf(ic), False, False, 0)
+            v.pack_start(icons, False, False, 0); b.add(v)
+            b.connect("clicked", lambda _b, k=n: self.select(k))
+            b.connect("button-press-event", lambda _b, e, k=n: (self.select(k), self.go_desktop()) if e.type == Gdk.EventType._2BUTTON_PRESS else False)
+            self.strip.pack_start(b, False, False, 0)
+        n = self.sel; mine = [w for w in wins if self.on_ws(w, n)]; sticky = [w for w in wins if w.get_workspace() is None]
+        self.l2.set_text("DESKTOP %d  ·  %d WINDOW%s" % (n + 1, len(mine), "" if len(mine) == 1 else "S"))
+        self.rm.set_visible(n == len(spaces) - 1 and not mine and len(spaces) > 1)
+        if not mine and not sticky:
+            e = Gtk.Label(label="Nothing open on this desktop.\nPress Enter (or double-click the desktop) to work here."); e.get_style_context().add_class("empty"); e.set_justify(Gtk.Justification.CENTER); e.set_margin_top(60); self.body.pack_start(e, True, True, 0)
+        else:
+            flow = Gtk.FlowBox(); flow.set_selection_mode(Gtk.SelectionMode.NONE); flow.set_max_children_per_line(8); flow.set_column_spacing(14); flow.set_row_spacing(14); flow.set_valign(Gtk.Align.START)
+            for w in mine + sticky: flow.add(self.card(w, spaces))
+            self.body.pack_start(flow, False, False, 0)
+        self.strip.show_all(); self.body.show_all(); self.rm.set_no_show_all(True)
+    def select(self, k): self.sel = k; self.build()
+    def go_desktop(self, *_):
+        ws = self.wnck.get_workspace(self.sel)
+        if ws: ws.activate(stamp())
+        self.close_now()
+
+    def card(self, w, spaces):
+        b = Gtk.Button(); b.set_relief(Gtk.ReliefStyle.NONE); b.get_style_context().add_class("card")
+        v = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
+        ic = w.get_icon()
+        v.pack_start(Gtk.Image.new_from_pixbuf(ic.scale_simple(64, 64, GdkPixbuf.InterpType.BILINEAR) if ic else None), False, False, 0)
+        n = Gtk.Label(label=w.get_name()); n.set_max_width_chars(24); n.set_ellipsize(3); n.get_style_context().add_class("wname"); v.pack_start(n, False, False, 0)
+        a = Gtk.Label(label=w.get_application().get_name() if w.get_application() else ""); a.get_style_context().add_class("wapp"); v.pack_start(a, False, False, 0)
+        b.add(v)
+        b.connect("clicked", lambda _b, win=w: self.focus(win))
+        b.connect("button-press-event", lambda _b, e, win=w: self.menu(e, win, spaces) if e.button == 3 else False)
+        return b
+    def focus(self, w):
+        ws = w.get_workspace()
+        if ws is not None: ws.activate(stamp())
+        if w.is_minimized(): w.unminimize(stamp())
+        w.activate(stamp()); self.close_now()
+    def menu(self, ev, w, spaces):
+        m = Gtk.Menu()
+        for ws in spaces:
+            it = Gtk.MenuItem(label="Move to Desktop %d" % (ws.get_number() + 1))
+            it.connect("activate", lambda _i, s=ws, win=w: (win.move_to_workspace(s), GLib.timeout_add(250, self.rebuild)))
+            m.append(it)
+        c = Gtk.MenuItem(label="Close window"); c.connect("activate", lambda *_: (w.close(stamp()), GLib.timeout_add(400, self.rebuild))); m.append(c)
+        m.show_all(); m.popup_at_pointer(ev); return True
+    def rebuild(self): self.build(); return False
+    def add_desktop(self, *_):
+        self.wnck.change_workspace_count(self.wnck.get_workspace_count() + 1); self.sel = self.wnck.get_workspace_count(); GLib.timeout_add(300, self.rebuild)
+    def remove_last(self, *_):
+        self.wnck.change_workspace_count(max(1, self.wnck.get_workspace_count() - 1)); self.sel = max(0, self.sel - 1); GLib.timeout_add(300, self.rebuild)
+
+def main():
+    prov = Gtk.CssProvider(); prov.load_from_data(CSS)
+    Gtk.StyleContext.add_provider_for_screen(Gdk.Screen.get_default(), prov, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
+    TaskView(); Gtk.main()
+
+if __name__ == "__main__":
+    main()

@@ -1,0 +1,251 @@
+#!/usr/bin/python3
+"""HEX login screen: animated background, lock screen with big clock, avatars, password, Create account."""
+import math, os, subprocess, time
+import cairo
+import gi
+gi.require_version("Gtk", "3.0")
+gi.require_version("Gdk", "3.0")
+gi.require_version("GdkPixbuf", "2.0")
+gi.require_version("LightDM", "1")
+from gi.repository import Gtk, Gdk, GdkPixbuf, GLib, LightDM
+
+LIVE = os.path.isdir("/run/live")
+VM = subprocess.run(["systemd-detect-virt", "-q"], capture_output=True).returncode == 0   # keep the login screen calm in virtual machines
+BG = "/usr/share/backgrounds/hex/hex-wallpaper-blur-plain.jpg"
+CSS = b"""
+window { background-color: #070d17; }
+.bigclock { font-size: 110px; font-weight: 200; color: #f2f7fb; }
+.bigdate { font-size: 24px; color: #d3e0ec; }
+.lockhint { font-size: 14px; color: #9fb3c8; }
+.card { background-color: rgba(14,26,43,0.94); border-radius: 26px; border: 1px solid #2a4a5e; padding: 26px 34px; }
+.av { min-width: 52px; min-height: 52px; border-radius: 26px; background-color: #2a4a5e; color: #d6e2ee; font-size: 22px; font-weight: 700; }
+.avbig { min-width: 92px; min-height: 92px; border-radius: 46px; background-color: #14968a; color: #ffffff; font-size: 42px; font-weight: 700; border: 3px solid #96ebcd; }
+.avbtn { background: none; border: none; box-shadow: none; padding: 2px; }
+.name { font-size: 20px; font-weight: 700; color: #ecf4fa; }
+.sub { color: #9fb3c8; font-size: 13px; }
+.hint { color: #96ebcd; font-size: 13px; }
+.err { color: #ff9e94; font-size: 13px; }
+.ok { color: #96ebcd; font-size: 13px; }
+.bar { background-color: rgba(8,14,24,0.80); padding: 8px 16px; color: #d6e2ee; }
+entry { min-height: 42px; border-radius: 12px; background-color: #17283d; border: 1px solid #3a5a74; color: #ffffff; padding: 0 12px; }
+entry:focus { border-color: #19b0a1; }
+combobox button { min-height: 34px; border-radius: 10px; }
+button.primary { background-image: none; background-color: #14968a; color: #ffffff; border-radius: 12px; min-height: 42px; border: none; font-weight: 700; }
+button.primary:hover { background-color: #19b0a1; }
+button.link { background: none; border: none; color: #96ebcd; box-shadow: none; }
+button.barbtn { background: none; border: none; color: #d6e2ee; box-shadow: none; }
+button.barbtn:hover { background-color: #17283d; border-radius: 8px; }
+"""
+
+def battery():
+    try:
+        d = "/sys/class/power_supply"
+        for n in sorted(os.listdir(d)):
+            if n.startswith("BAT"):
+                return "Battery %s%%" % open("%s/%s/capacity" % (d, n)).read().strip()
+    except Exception:
+        pass
+    return ""
+
+class Greeter(Gtk.Window):
+    def __init__(self):
+        super().__init__()
+        self.greeter = LightDM.Greeter()
+        self.greeter.connect("show-prompt", self.on_prompt)
+        self.greeter.connect("show-message", self.on_message)
+        self.greeter.connect("authentication-complete", self.on_done)
+        if not self.greeter.connect_to_daemon_sync():
+            raise SystemExit(1)
+        self.pw = ""; self.names = []; self.display = {}; self.sel = 0; self.t0 = time.time(); self.busy = False
+        self.set_decorated(False)
+        scr = Gdk.Screen.get_default(); sw, sh = scr.get_width(), scr.get_height()
+        self.set_default_size(sw, sh); self.move(0, 0)
+        try: self.bgpix = GdkPixbuf.Pixbuf.new_from_file_at_scale(BG, sw, sh, False)
+        except Exception: self.bgpix = None
+
+        overlay = Gtk.Overlay(); self.add(overlay)
+        self.area = Gtk.DrawingArea(); self.area.connect("draw", self.on_draw); overlay.add(self.area)
+        root = Gtk.Box(orientation=Gtk.Orientation.VERTICAL); overlay.add_overlay(root)
+        top = Gtk.Box(); top.get_style_context().add_class("bar")
+        top.pack_start(Gtk.Label(label=GLib.get_host_name()), False, False, 0)
+        self.topclock = Gtk.Label(); top.pack_end(self.topclock, False, False, 0)
+        self.bat = Gtk.Label(label=battery()); top.pack_end(self.bat, False, False, 18)
+        root.pack_start(top, False, False, 0)
+
+        self.pages = Gtk.Stack(); self.pages.set_transition_type(Gtk.StackTransitionType.CROSSFADE); self.pages.set_transition_duration(600)
+        root.pack_start(self.pages, True, True, 0)
+        # lock page
+        lock = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6); lock.set_halign(Gtk.Align.CENTER); lock.set_valign(Gtk.Align.CENTER)
+        self.clock = Gtk.Label(); self.clock.get_style_context().add_class("bigclock"); lock.pack_start(self.clock, False, False, 0)
+        self.date = Gtk.Label(); self.date.get_style_context().add_class("bigdate"); lock.pack_start(self.date, False, False, 0)
+        lh = Gtk.Label(label="Click or press any key"); lh.get_style_context().add_class("lockhint"); lock.pack_start(lh, False, False, 28)
+        self.pages.add_named(lock, "lock")
+        # login page
+        centre = Gtk.Box(); centre.set_halign(Gtk.Align.CENTER); centre.set_valign(Gtk.Align.CENTER)
+        self.pages.add_named(centre, "login")
+        self.reveal = Gtk.Revealer(); self.reveal.set_transition_type(Gtk.RevealerTransitionType.SLIDE_UP); self.reveal.set_transition_duration(700); centre.pack_start(self.reveal, False, False, 0)
+        self.card = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12); self.card.get_style_context().add_class("card"); self.card.set_size_request(400, -1); self.reveal.add(self.card)
+        self.avbox = Gtk.Box(spacing=12); self.avbox.set_halign(Gtk.Align.CENTER); self.card.pack_start(self.avbox, False, False, 0)
+        self.name = Gtk.Label(); self.name.get_style_context().add_class("name"); self.card.pack_start(self.name, False, False, 0)
+        self.stack = Gtk.Stack(); self.stack.set_transition_type(Gtk.StackTransitionType.SLIDE_LEFT_RIGHT); self.stack.set_transition_duration(300); self.stack.set_interpolate_size(True); self.stack.set_homogeneous(False)
+        self.card.pack_start(self.stack, False, False, 0)
+        self.caps = Gtk.Label(label=""); self.caps.get_style_context().add_class("err"); self.card.pack_start(self.caps, False, False, 0)
+        self.msg = Gtk.Label(); self.msg.set_line_wrap(True); self.msg.set_max_width_chars(40); self.card.pack_start(self.msg, False, False, 0)
+
+        lp = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+        self.entry = Gtk.Entry(); self.entry.set_visibility(False); self.entry.set_placeholder_text("Password")
+        self.entry.set_icon_from_icon_name(Gtk.EntryIconPosition.SECONDARY, "view-reveal-symbolic")
+        self.entry.connect("icon-press", lambda e, *_: e.set_visibility(not e.get_visibility())); self.entry.connect("activate", self.do_login)
+        lp.pack_start(self.entry, False, False, 0)
+        self.login_btn = Gtk.Button(label="Log in"); self.login_btn.get_style_context().add_class("primary"); self.login_btn.connect("clicked", self.do_login); lp.pack_start(self.login_btn, False, False, 0)
+        su = Gtk.Button(label="Create a new account"); su.get_style_context().add_class("link"); su.connect("clicked", lambda *_: self.show_page("signup")); lp.pack_start(su, False, False, 0)
+        hint = Gtk.Label(); hint.set_line_wrap(True); hint.set_max_width_chars(40); hint.get_style_context().add_class("hint")
+        hint.set_text("Live session.  Username: user    Password: live" if LIVE else "Forgot your password? Boot the HEX USB, then Welcome > Reset a forgotten password.")
+        lp.pack_start(hint, False, False, 0); self.stack.add_named(lp, "login")
+
+        sp = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
+        def field(ph, secret=False):
+            e = Gtk.Entry(); e.set_placeholder_text(ph); e.set_visibility(not secret); sp.pack_start(e, False, False, 0); return e
+        self.f_user = field("New username (lowercase)"); self.f_name = field("Full name (optional)")
+        self.f_pw1 = field("New password", True); self.f_pw2 = field("Repeat the new password", True)
+        a = Gtk.Label(label="An administrator must approve new accounts:"); a.get_style_context().add_class("sub"); a.set_xalign(0); sp.pack_start(a, False, False, 0)
+        self.f_admin = field("Administrator username"); self.f_apw = field("Administrator password", True); self.f_apw.connect("activate", self.do_signup)
+        row = Gtk.Box(spacing=8)
+        back = Gtk.Button(label="Back"); back.get_style_context().add_class("link"); back.connect("clicked", lambda *_: self.show_page("login"))
+        ok = Gtk.Button(label="Create account"); ok.get_style_context().add_class("primary"); ok.connect("clicked", self.do_signup)
+        row.pack_start(back, False, False, 0); row.pack_end(ok, True, True, 0); sp.pack_start(row, False, False, 0); self.stack.add_named(sp, "signup")
+
+        bar = Gtk.Box(spacing=10); bar.get_style_context().add_class("bar")
+        self.sessions = Gtk.ComboBoxText(); self.session_keys = []
+        for s in LightDM.get_sessions():
+            self.sessions.append_text(s.get_name()); self.session_keys.append(s.get_key())
+        if self.session_keys: self.sessions.set_active(self.session_keys.index("xfce") if "xfce" in self.session_keys else 0)
+        bar.pack_start(self.sessions, False, False, 0)
+        for label, can, fn in (("Shut down", LightDM.get_can_shutdown, LightDM.shutdown), ("Restart", LightDM.get_can_restart, LightDM.restart)):
+            btn = Gtk.Button(label=label); btn.get_style_context().add_class("barbtn"); btn.connect("clicked", lambda _b, f=fn: f()); btn.set_sensitive(bool(can())); bar.pack_end(btn, False, False, 0)
+        root.pack_end(bar, False, False, 0)
+
+        for u in LightDM.UserList.get_instance().get_users(): self.add_user(u.get_name(), u.get_display_name() or u.get_name(), rebuild=False)
+        self.rebuild_avatars()
+        self.connect("key-press-event", self.on_key); self.connect("button-press-event", self.on_click)
+        self.add_events(Gdk.EventMask.BUTTON_PRESS_MASK)
+        self.tick(); GLib.timeout_add_seconds(1, self.tick); (None if VM else GLib.timeout_add(110, self.animate)); GLib.timeout_add(500, self.check_caps)
+        GLib.timeout_add(4500, self.auto_unlock)
+
+    # ---- background ----
+    def animate(self):
+        self.area.queue_draw(); return True
+    def on_draw(self, area, cr):
+        w, h = area.get_allocated_width(), area.get_allocated_height()
+        if self.bgpix: Gdk.cairo_set_source_pixbuf(cr, self.bgpix, 0, 0); cr.paint()
+        else: cr.set_source_rgb(0.03, 0.05, 0.09); cr.paint()
+        t = time.time() - self.t0
+        for cx, cy, r, col, a in ((0.2 + 0.12 * math.sin(t * 0.21), 0.3 + 0.10 * math.cos(t * 0.17), 0.45, (0.08, 0.72, 0.65), 0.22),
+                                  (0.8 + 0.10 * math.cos(t * 0.19), 0.25 + 0.12 * math.sin(t * 0.23), 0.50, (0.45, 0.30, 0.95), 0.25),
+                                  (0.55 + 0.15 * math.sin(t * 0.13), 0.80 + 0.08 * math.cos(t * 0.29), 0.45, (0.10, 0.45, 0.85), 0.20)):
+            g = cairo.RadialGradient(cx * w, cy * h, 0, cx * w, cy * h, r * max(w, h))
+            g.add_color_stop_rgba(0, col[0], col[1], col[2], a); g.add_color_stop_rgba(1, col[0], col[1], col[2], 0)
+            cr.set_source(g); cr.paint()
+        return False
+
+    # ---- lock screen -> login ----
+    def unlock(self):
+        if self.pages.get_visible_child_name() != "lock": return
+        self.pages.set_visible_child_name("login"); self.entry.grab_focus()
+        GLib.timeout_add(200, lambda: (self.reveal.set_reveal_child(True), False)[1])
+    def auto_unlock(self): self.unlock(); return False
+    def on_key(self, w, e):
+        if self.pages.get_visible_child_name() == "lock": self.unlock(); return True
+        return False
+    def on_click(self, w, e):
+        if self.pages.get_visible_child_name() == "lock": self.unlock(); return True
+        return False
+
+    # ---- users ----
+    def add_user(self, name, display, rebuild=True):
+        if name in self.names: return
+        self.names.append(name); self.display[name] = display
+        if rebuild: self.rebuild_avatars()
+    def rebuild_avatars(self):
+        for c in self.avbox.get_children(): self.avbox.remove(c)
+        for i, n in enumerate(self.names):
+            b = Gtk.Button(); b.get_style_context().add_class("avbtn")
+            l = Gtk.Label(label=(self.display[n][:1] or "?").upper()); l.get_style_context().add_class("avbig" if i == self.sel else "av"); l.set_halign(Gtk.Align.CENTER); l.set_valign(Gtk.Align.CENTER); b.set_valign(Gtk.Align.CENTER)
+            b.add(l); b.connect("clicked", lambda _b, k=i: self.pick(k)); self.avbox.pack_start(b, False, False, 0)
+        if self.names: self.name.set_text(self.display[self.names[self.sel]])
+        self.avbox.show_all()
+    def pick(self, i):
+        self.sel = i; self.rebuild_avatars(); self.entry.grab_focus()
+
+    def show_page(self, page):
+        self.set_msg(""); self.stack.set_visible_child_name(page)
+        login = page == "login"
+        for w in (self.avbox, self.name): w.set_visible(login)
+        (self.entry if login else self.f_user).grab_focus()
+    def set_msg(self, text, kind="err"):
+        ctx = self.msg.get_style_context()
+        for c in ("err", "ok"): ctx.remove_class(c)
+        ctx.add_class(kind); self.msg.set_text(text)
+    def tick(self, *_):
+        self.clock.set_text(time.strftime("%H:%M")); self.date.set_text(time.strftime("%A, %d %B"))
+        self.topclock.set_text(time.strftime("%a %d %b   %H:%M")); self.bat.set_text(battery()); return True
+    def check_caps(self):
+        try: on = Gdk.Keymap.get_for_display(Gdk.Display.get_default()).get_caps_lock_state()
+        except Exception: on = False
+        self.caps.set_text("Caps Lock is on" if on and self.stack.get_visible_child_name() == "login" else ""); return True
+    def shake(self):
+        seq = iter([18, -18, 14, -14, 8, -8, 0])
+        def step():
+            try: o = next(seq)
+            except StopIteration: return False
+            self.card.set_margin_start(max(o, 0) * 2); self.card.set_margin_end(max(-o, 0) * 2); return True
+        GLib.timeout_add(45, step)
+
+    # ---- login ----
+    def do_login(self, *_):
+        if not self.names or self.busy: return
+        self.pw = self.entry.get_text(); self.set_msg("Signing in...", "ok"); self.login_btn.set_sensitive(False); self.busy = True
+        if self.greeter.get_in_authentication(): self.greeter.cancel_authentication()
+        self.greeter.authenticate(self.names[self.sel])
+    def on_prompt(self, g, text, ptype): g.respond(self.pw)
+    def on_message(self, g, text, mtype):
+        if text: self.set_msg(text)
+    def on_done(self, g):
+        self.busy = False
+        if g.get_is_authenticated():
+            self.set_msg("Welcome!", "ok")
+            i = self.sessions.get_active(); key = self.session_keys[i] if 0 <= i < len(self.session_keys) else "xfce"
+            if not g.start_session_sync(key): self.set_msg("Could not start the session."); self.login_btn.set_sensitive(True)
+        else:
+            self.set_msg("Wrong password. Please try again."); self.login_btn.set_sensitive(True)
+            self.entry.set_text(""); self.entry.grab_focus(); self.shake()
+
+    def do_signup(self, *_):
+        u, n = self.f_user.get_text().strip(), self.f_name.get_text().strip()
+        p1, p2 = self.f_pw1.get_text(), self.f_pw2.get_text(); a, ap = self.f_admin.get_text().strip(), self.f_apw.get_text()
+        if not u or not p1 or not a or not ap: return self.set_msg("Please fill in every field except the full name.")
+        if p1 != p2: self.shake(); return self.set_msg("The two new passwords do not match.")
+        self.set_msg("Creating the account...", "ok")
+        try:
+            r = subprocess.run(["sudo", "-n", "/usr/local/sbin/hex-signup-helper"], input="\n".join([u, n, p1, a, ap]) + "\n", capture_output=True, text=True, timeout=40)
+            out = r.stdout.strip()
+        except Exception:
+            out = ""
+        if out.startswith("OK"):
+            self.add_user(u, n or u, rebuild=False); self.sel = self.names.index(u); self.rebuild_avatars()
+            for e in (self.f_user, self.f_name, self.f_pw1, self.f_pw2, self.f_admin, self.f_apw): e.set_text("")
+            self.show_page("login"); self.set_msg("Account '%s' is ready. Enter its password to log in." % u, "ok")
+        else:
+            self.shake(); self.set_msg(out[4:] if out.startswith("ERR ") else "Could not create the account.")
+
+def main():
+    prov = Gtk.CssProvider(); prov.load_from_data(CSS)
+    Gtk.StyleContext.add_provider_for_screen(Gdk.Screen.get_default(), prov, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
+    st = Gtk.Settings.get_default()
+    for k, v in (("gtk-theme-name", "Arc-Dark"), ("gtk-icon-theme-name", "Papirus-Dark"), ("gtk-font-name", "Inter 11"), ("gtk-cursor-theme-name", "HEX-Cursor")):
+        try: st.set_property(k, v)
+        except Exception: pass
+    w = Greeter(); w.show_all(); Gtk.main()
+
+if __name__ == "__main__":
+    main()

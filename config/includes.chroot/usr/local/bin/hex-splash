@@ -1,0 +1,46 @@
+#!/usr/bin/python3
+"""HEX start-up screen: covers the grey gap between logging in and the desktop being ready, then plays the chime."""
+import subprocess, time
+import cairo
+import gi
+gi.require_version("Gtk", "3.0"); gi.require_version("Gdk", "3.0")
+from gi.repository import Gtk, Gdk, GLib
+
+CSS = b".sname { font-size: 34px; font-weight: 300; color: #f2f7fb; } .ssub { font-size: 14px; color: #9fb3c8; }"
+
+def running(name):
+    return subprocess.run(["pgrep", "-x", name], capture_output=True).returncode == 0
+
+class Splash(Gtk.Window):
+    def __init__(self):
+        super().__init__(type=Gtk.WindowType.POPUP)
+        scr = Gdk.Screen.get_default(); self.set_default_size(scr.get_width(), scr.get_height()); self.move(0, 0)
+        self.set_app_paintable(True); self.connect("draw", self.on_draw)
+        box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=14); box.set_halign(Gtk.Align.CENTER); box.set_valign(Gtk.Align.CENTER); self.add(box)
+        try:
+            from gi.repository import GdkPixbuf
+            box.pack_start(Gtk.Image.new_from_pixbuf(GdkPixbuf.Pixbuf.new_from_file_at_scale("/usr/share/plymouth/themes/hex/logo.png", 150, 150, True)), False, False, 0)
+        except Exception: pass
+        n = Gtk.Label(label="HEX OS"); n.get_style_context().add_class("sname"); box.pack_start(n, False, False, 0)
+        sp = Gtk.Spinner(); sp.start(); sp.set_size_request(32, 32); box.pack_start(sp, False, False, 8)
+        s = Gtk.Label(label="Starting your desktop..."); s.get_style_context().add_class("ssub"); box.pack_start(s, False, False, 0)
+        self.t0 = time.time(); self.ready_since = None
+        GLib.timeout_add(400, self.check)
+    def on_draw(self, w, cr):
+        W, H = w.get_allocated_width(), w.get_allocated_height()
+        g = cairo.LinearGradient(0, 0, 0, H); g.add_color_stop_rgb(0, 0.027, 0.051, 0.090); g.add_color_stop_rgb(1, 0.040, 0.100, 0.130); cr.set_source(g); cr.paint(); return False
+    def check(self):
+        ok = running("xfce4-panel") and running("xfdesktop")
+        if ok and self.ready_since is None: self.ready_since = time.time()
+        if (self.ready_since and time.time() - self.ready_since > 1.6) or time.time() - self.t0 > 70:
+            subprocess.Popen(["bash", "/usr/local/bin/hex-sound", "startup"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, start_new_session=True)
+            Gtk.main_quit(); return False
+        return True
+
+def main():
+    p = Gtk.CssProvider(); p.load_from_data(CSS)
+    Gtk.StyleContext.add_provider_for_screen(Gdk.Screen.get_default(), p, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
+    w = Splash(); w.show_all(); Gtk.main()
+
+if __name__ == "__main__":
+    main()

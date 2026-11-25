@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+# HEX Welcome: a friendly menu for first steps.
+while true; do
+  items=()
+  [ -d /run/live ] && items+=(install "Install HEX OS to this computer")
+  items+=(apps "Get apps (search and install)" look "Switch dark / light look" taskview "Task view and desktops (Win+Tab)" quick "Quick settings (Win+A)" widgets "Weather and news (Win+W)" wall "Change wallpaper" fx "Animations and effects" sound "Sounds on / off" soundtest "Test the sound" wifi "Wi-Fi and network" settings "Settings" keys "Keyboard shortcuts" backup "System snapshots (Timeshift)" ai "Set up local AI (beta)" account "Create a new account" reset "Reset a forgotten password" diag "Troubleshooting report" quit "Close")
+  C=$(zenity --list --title="Welcome to HEX OS" --text="What would you like to do?" --column=id --column="Choose" --hide-column=1 --print-column=1 --width=520 --height=620 "${items[@]}") || exit 0
+  case "$C" in
+    install) (sudo -E calamares >/dev/null 2>&1 &) ;;
+    apps) (xfce4-terminal -x bash /usr/local/bin/hex-apps >/dev/null 2>&1 &) ;;
+    look)
+      cur=$(xfconf-query -c xsettings -p /Net/ThemeName 2>/dev/null)
+      if [ "$cur" = "Arc-Dark" ]; then t=Arc; i=Papirus; else t=Arc-Dark; i=Papirus-Dark; fi
+      xfconf-query -c xsettings -p /Net/ThemeName -n -t string -s "$t"
+      xfconf-query -c xsettings -p /Net/IconThemeName -n -t string -s "$i"
+      xfconf-query -c xfwm4 -p /general/theme -n -t string -s "$t" ;;
+    account) bash /usr/local/bin/hex-add-user ;;
+    reset) bash /usr/local/bin/hex-reset-password ;;
+    fx)
+      E=$(zenity --list --title="Animations and effects" --text="Pick how windows move and look:" --column=id --column="Style" --hide-column=1 --print-column=1 --width=520 --height=300 \
+          smooth "Smooth: windows fade in and out (safe everywhere)" glass "Glass: fade + blur (needs a real graphics card)" off "Off: plain and fastest") || continue
+      bash /usr/local/bin/hex-fx "$E" ;;
+    widgets) bash /usr/local/bin/hex-widgets-toggle ;;
+    taskview) bash /usr/local/bin/hex-taskview-toggle ;;
+    quick) bash /usr/local/bin/hex-quick-toggle ;;
+    wall) bash /usr/local/bin/hex-wallpaper next ;;
+    soundtest) bash /usr/local/bin/hex-sound-test ;;
+    sound)
+      if [ -f "$HOME/.config/hex-sound-off" ]; then rm -f "$HOME/.config/hex-sound-off"; bash /usr/local/bin/hex-sound ready; zenity --info --text="Sounds are on."
+      else touch "$HOME/.config/hex-sound-off"; zenity --info --text="Sounds are off."; fi ;;
+    wifi) (python3 /usr/local/bin/hex-wifi >/dev/null 2>&1 &) ;;
+    settings) (python3 /usr/local/bin/hex-settings >/dev/null 2>&1 &) ;;
+    diag) bash /usr/local/bin/hex-diagnose ;;
+    keys) zenity --info --title="Shortcuts" --text="Windows key: Start menu and search\nWin+Tab: Task view and virtual desktops\nCtrl+Win+Left/Right: switch desktop\nCtrl+Win+D: new desktop    Ctrl+Win+F4: close desktop\nWin+Arrows: snap windows (left, right, maximise, minimise)\nWin+E: Files    Win+L: Lock    Win+D: Show desktop\nWin+V: Clipboard history\nWin+Shift+S: Screenshot of an area\nWin+W: Weather and news    Win+A: Quick settings\nCtrl+Alt+T: Terminal    Alt+Tab: Switch windows" ;;
+    backup) (timeshift-launcher >/dev/null 2>&1 &) ;;
+    ai) bash /usr/local/bin/hex-ai --setup ;;
+    *) exit 0 ;;
+  esac
+done

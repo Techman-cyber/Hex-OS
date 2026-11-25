@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+# Plays a HEX sound: hex-sound startup | logout | ready.  Turn off with: touch ~/.config/hex-sound-off
+[ -f "$HOME/.config/hex-sound-off" ] && exit 0
+f="/usr/share/sounds/hex/${1:-ready}.wav"
+[ -f "$f" ] || exit 0
+bash /usr/local/bin/hex-audio-init
+paplay --volume=52000 "$f" 2>/dev/null || aplay -q "$f" 2>/dev/null
+exit 0

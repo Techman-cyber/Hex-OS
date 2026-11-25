@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+# Plays a test sound and explains what to do if there is none.
+bash /usr/local/bin/hex-audio-init
+if ! pactl info >/dev/null 2>&1; then
+  zenity --warning --no-wrap --title="Sound" --text="The sound system is not running.\nTry logging out and in again."; exit 1
+fi
+if [ "$(pactl list short sinks | wc -l)" -eq 0 ]; then
+  zenity --warning --no-wrap --title="No sound card found" --text="This computer (or virtual machine) has no sound device.\n\nIn VirtualBox: shut the VM down, then open\nSettings > Audio and tick  Enable Audio\n(Host Audio Driver: default, Controller: Intel HD Audio).\nThen start the VM again."; exit 1
+fi
+paplay --volume=60000 /usr/share/sounds/hex/startup.wav 2>/dev/null
+zenity --question --title="Sound" --text="Did you hear the chime?" --ok-label="Yes" --cancel-label="No" && exit 0
+zenity --info --no-wrap --title="Sound" --text="A sound device exists, so check:\n- the volume of your real computer and the VM window\n- the speaker icon in the taskbar tray (is it muted?)\n- Settings > Audio in VirtualBox: Enable Audio is ticked\nOpen the volume mixer with the speaker icon > Audio mixer."
