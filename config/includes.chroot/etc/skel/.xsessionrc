@@ -1,0 +1,3 @@
+# HEX: dark start-up background and the loading screen (sound plays when the desktop is ready)
+xsetroot -solid '#070d17' 2>/dev/null
+[ -x /usr/local/bin/hex-splash ] && (python3 /usr/local/bin/hex-splash >/dev/null 2>&1 &)
