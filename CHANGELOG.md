@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.10
+- Task View redesigned: desktops across the top, windows of the chosen desktop below, solid background.
+- New Settings app (search, Network, Display, Sound, Accounts, Updates, About ...) and a new Wi-Fi window.
+- Quick Settings made compact: hides hardware that is missing, no longer freezes while opening, reads the real theme.
+- Start-up loading screen; the chime now plays when the desktop is ready. Logout/restart/shut-down sound. Power menu.
+- Less lag: no window compositor by default in virtual machines; calm (static) login screen in virtual machines.
+- Removed the taskbar weather text (it showed "(genmon)XXX"); weather stays in the Widgets panel.
+
 ## 0.9
 - Task View (Win+Tab) with virtual desktops; Windows-style shortcuts (Win+Arrows snapping, Ctrl+Win+Left/Right, Win+V, Win+Shift+S, Win+L, Win+A, Win+D, Win+E).
 - Quick Settings panel (Win+A): Wi-Fi, Bluetooth, focus mode, night light, dark mode, animations, volume, brightness, screenshot, wallpaper, lock, power.

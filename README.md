@@ -5,10 +5,12 @@ A free, good-looking, easy operating system. Based on **Debian 12** with the **X
 - **Easy:** normal desktop, normal installer (Calamares), works in virtual machines
 - **Crazy looking:** dark Arc theme, generated hex wallpaper, Papirus icons, window shadows and transparency
 - **Familiar like Windows, nicer:** a bottom taskbar, a Start menu with search (click it or press the Windows key), a yellow custom cursor
+- **Settings app:** one clean place for network, display, sound, accounts, updates and more, with search
+- **Wi-Fi window:** nearby networks, signal, password prompt, on/off switch
 - **Task View (Win+Tab):** all windows on all virtual desktops, new/remove desktops, move windows between desktops
 - **Quick Settings (Win+A):** Wi-Fi, Bluetooth, volume, brightness, night light, focus mode, dark mode, screenshots
 - **Windows-style shortcuts:** Win+Arrows snap windows, Win+V clipboard history, Win+Shift+S screenshot area, Win+L lock, Ctrl+Win+Left/Right switch desktop
-- **Widgets (like Windows 11, free of accounts):** weather, calendar and news in a panel above the taskbar (Win+W), plus the temperature on the taskbar
+- **Widgets (like Windows 11, free of accounts):** weather, calendar and news in a panel above the taskbar (Win+W)
 - **Polish:** startup sound and event sounds, a boot animation, fade animations for windows, a redesigned login screen
 - **Private and safe:** no telemetry added by HEX, firewall (ufw), AppArmor, automatic security updates
 - **Recovery:** Timeshift system snapshots

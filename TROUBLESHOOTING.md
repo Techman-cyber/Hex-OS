@@ -66,3 +66,15 @@ username and password in the installer.
 - Open **Welcome -> Test the sound**. It plays the chime and tells you what is missing.
 - In VirtualBox, audio is off unless you tick **Settings -> Audio -> Enable Audio** (shut the VM down first). Real computers need no setting.
 - The speaker icon in the tray opens the mixer; **Quick settings (Win+A)** has a volume slider and mute button.
+
+## Lag, loading screen and logout sound
+- **Lag in a virtual machine:** HEX turns window effects off by default inside VMs, because VirtualBox draws them in software.
+  Give the VM **4 or more CPU cores**, **4 GB RAM or more**, **128 MB video memory**, and leave **3D acceleration off**.
+  **Quick settings -> Animations** (or **Welcome -> Animations and effects**) turns the fade effects on if you want them.
+- **Loading screen:** after you log in, a "Starting your desktop..." screen covers the gap, and the start-up chime plays when the desktop actually appears.
+- **Logout sound:** it plays when you choose Log out, Restart or Shut down from the Start menu or the power button in Quick settings.
+
+## Settings and Wi-Fi
+- **Settings** (the gear on the taskbar) has everything in one place, with a search box.
+- **Wi-Fi:** the Wi-Fi window lists networks, shows signal strength and asks for the password. In VirtualBox there is no Wi-Fi adapter to show.
+  The VM sees a wired connection (Ethernet), whatever your PC uses. On a real computer your Wi-Fi networks appear automatically.
