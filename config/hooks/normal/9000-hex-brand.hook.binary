@@ -1,5 +1,0 @@
-#!/bin/sh
-for f in boot/grub/grub.cfg isolinux/live.cfg isolinux/menu.cfg isolinux/isolinux.cfg; do
-  [ -f "$f" ] && sed -i 's/Debian GNU\/Linux/HEX OS/g; s/Debian Live/HEX OS/g; s/Live system/HEX OS (live)/g' "$f"
-done
-exit 0

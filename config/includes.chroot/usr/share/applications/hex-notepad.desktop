@@ -1,8 +1,0 @@
-[Desktop Entry]
-Type=Application
-Name=Notepad
-Comment=Simple text editor
-Exec=mousepad %F
-Icon=accessories-text-editor
-Categories=Utility;TextEditor;
-Keywords=notepad;text;edit;note;

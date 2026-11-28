@@ -1,8 +1,0 @@
-[Desktop Entry]
-Type=Application
-Name=Task View
-Comment=All windows and virtual desktops (Win+Tab)
-Exec=bash /usr/local/bin/hex-taskview-toggle
-Icon=/usr/share/icons/hicolor/128x128/apps/hex-taskview.png
-Categories=Utility;
-Keywords=desktops;workspaces;windows;switch;

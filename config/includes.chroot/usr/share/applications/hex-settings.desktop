@@ -1,8 +1,0 @@
-[Desktop Entry]
-Type=Application
-Name=Settings
-Comment=Network, display, sound, accounts and more
-Exec=python3 /usr/local/bin/hex-settings
-Icon=preferences-system
-Categories=Settings;System;
-Keywords=settings;control;panel;preferences;

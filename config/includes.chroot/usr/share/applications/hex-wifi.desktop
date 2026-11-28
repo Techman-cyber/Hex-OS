@@ -1,8 +1,0 @@
-[Desktop Entry]
-Type=Application
-Name=Wi-Fi
-Comment=Connect to Wi-Fi networks
-Exec=python3 /usr/local/bin/hex-wifi
-Icon=network-wireless
-Categories=Settings;Network;
-Keywords=wifi;wireless;network;internet;
