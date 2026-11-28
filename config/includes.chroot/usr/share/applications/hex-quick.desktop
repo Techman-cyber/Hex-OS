@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Quick Settings
+Comment=Wi-Fi, Bluetooth, volume, brightness and more (Win+A)
+Exec=bash /usr/local/bin/hex-quick-toggle
+Icon=/usr/share/icons/hicolor/128x128/apps/hex-quick.png
+Categories=Settings;
+Keywords=wifi;bluetooth;volume;brightness;night;focus;

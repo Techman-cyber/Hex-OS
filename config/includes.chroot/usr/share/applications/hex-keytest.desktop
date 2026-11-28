@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=Keyboard test
+Comment=Check that shortcuts like Alt+F4 and Alt+Tab reach the computer
+Exec=python3 /usr/local/bin/hex-keytest
+Icon=input-keyboard
+Categories=Settings;System;

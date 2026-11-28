@@ -1,0 +1,41 @@
+#!/usr/bin/python3
+"""HEX keyboard test: shows which keys reach the computer, to tell a broken shortcut from a key that never arrives."""
+import time
+import gi
+gi.require_version("Gtk", "3.0"); gi.require_version("Gdk", "3.0")
+from gi.repository import Gtk, Gdk
+
+CSS = b"""
+window { background-color: #0a111c; }
+.title { font-size: 22px; font-weight: 700; color: #ecf4fa; }
+.txt { font-size: 13px; color: #c5d4e3; }
+.good { color: #96ebcd; font-weight: 700; }
+.key { font-size: 20px; font-weight: 700; color: #ffffff; background-color: #17283d; border-radius: 10px; padding: 6px 14px; }
+.hist { font-size: 12px; color: #9fb3c8; }
+"""
+class T(Gtk.Window):
+    def __init__(self):
+        super().__init__(title="Keyboard test"); self.set_default_size(560, 420); self.set_position(Gtk.WindowPosition.CENTER)
+        v = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12); v.set_border_width(22); self.add(v)
+        t = Gtk.Label(label="Keyboard test"); t.set_xalign(0); t.get_style_context().add_class("title"); v.pack_start(t, False, False, 0)
+        for line in ("Press the shortcut you want to check. Then read what happened:",
+                     "1.  This window CLOSES after Alt+F4  ->  Alt+F4 works.",
+                     "2.  The window changes after Alt+Tab (with two windows open)  ->  Alt+Tab works.",
+                     "3.  You SEE the key shown below  ->  the key reached HEX, but the desktop did not use it (tell me which one).",
+                     "4.  Nothing happens and nothing is shown  ->  Windows or VirtualBox kept the key.\n      Click inside the VM window once, and check VirtualBox: Input > Keyboard > Auto Capture Keyboard."):
+            l = Gtk.Label(label=line); l.set_xalign(0); l.set_line_wrap(True); l.get_style_context().add_class("txt"); v.pack_start(l, False, False, 0)
+        self.key = Gtk.Label(label="(no key yet)"); self.key.get_style_context().add_class("key"); self.key.set_halign(Gtk.Align.START); v.pack_start(self.key, False, False, 6)
+        self.hist = Gtk.Label(label=""); self.hist.set_xalign(0); self.hist.set_yalign(0); self.hist.get_style_context().add_class("hist"); v.pack_start(self.hist, True, True, 0)
+        self.log = []
+        self.connect("key-press-event", self.on_key); self.connect("destroy", Gtk.main_quit)
+    def on_key(self, w, e):
+        name = Gtk.accelerator_name(e.keyval, e.state & Gtk.accelerator_get_default_mod_mask()) or Gdk.keyval_name(e.keyval)
+        self.key.set_text(name.replace("<", "").replace(">", " + ")); self.log.insert(0, "%s   %s" % (time.strftime("%H:%M:%S"), name)); self.hist.set_text("\n".join(self.log[:8])); return True
+
+def main():
+    p = Gtk.CssProvider(); p.load_from_data(CSS)
+    Gtk.StyleContext.add_provider_for_screen(Gdk.Screen.get_default(), p, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
+    T().show_all(); Gtk.main()
+
+if __name__ == "__main__":
+    main()

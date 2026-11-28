@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+# Changes the wallpaper. Usage: hex-wallpaper next | aurora | sunset | graphite | ocean
+D=/usr/share/backgrounds/hex
+declare -A F=([aurora]=hex-wallpaper.jpg [sunset]=wp-sunset.jpg [graphite]=wp-graphite.jpg [ocean]=wp-ocean.jpg)
+ORDER=(aurora sunset graphite ocean)
+S="$HOME/.config/hex-wallpaper"
+cur=$(cat "$S" 2>/dev/null || echo aurora)
+if [ "${1:-next}" = next ]; then
+  for i in "${!ORDER[@]}"; do [ "${ORDER[$i]}" = "$cur" ] && n=$(( (i + 1) % ${#ORDER[@]} )); done
+  pick=${ORDER[${n:-0}]}
+else pick="$1"; fi
+[ -n "${F[$pick]}" ] || exit 1
+echo "$pick" > "$S"
+WP="$D/${F[$pick]}"
+xfconf-query -c xfce4-desktop -l 2>/dev/null | grep -E 'last-image$' | while read -r p; do xfconf-query -c xfce4-desktop -p "$p" -s "$WP"; done
+echo "Wallpaper: $pick"
