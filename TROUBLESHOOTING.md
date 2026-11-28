@@ -78,3 +78,13 @@ username and password in the installer.
 - **Settings** (the gear on the taskbar) has everything in one place, with a search box.
 - **Wi-Fi:** the Wi-Fi window lists networks, shows signal strength and asks for the password. In VirtualBox there is no Wi-Fi adapter to show.
   The VM sees a wired connection (Ethernet), whatever your PC uses. On a real computer your Wi-Fi networks appear automatically.
+
+## Shortcuts like Alt+F4 or Alt+Tab do nothing
+1. Open **Welcome -> Test the keyboard shortcuts**, then press the shortcut:
+   - the test window **closes** (Alt+F4) or the window **changes** (Alt+Tab): the shortcut works;
+   - you **see the key** in the tester but nothing else happens: the key arrived but the desktop ignored it, please report which one;
+   - **nothing at all** happens: Windows or VirtualBox kept the key and it never reached HEX.
+2. In VirtualBox, click once inside the VM window. Make sure **File -> Preferences -> Input -> Keyboard -> Auto Capture Keyboard**
+   is ticked. The **Host key** (Right Ctrl) gives the keyboard back to Windows. Windows-key shortcuts and Alt+Tab are the
+   ones a Windows host most often grabs when the VM does not have the keyboard.
+3. The shortcut file contains every standard Xfce shortcut plus the Windows-style ones (see `tools/make-shortcuts.py`).

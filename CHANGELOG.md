@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.10.1
+- Shortcuts: the shortcut file now contains ALL Xfce default shortcuts (Alt+F4, Alt+Tab, Ctrl+Alt+T, Alt+F2, Print, volume/media keys ...) plus the Windows-style ones.
+  Before, the "override" setting made Xfce ignore every default command shortcut. Win+Tab no longer clashes with Xfce's own Super+Tab.
+- New "Test the keyboard shortcuts" tool to tell a broken shortcut from a key that Windows/VirtualBox never passed on.
+
 ## 0.10
 - Task View redesigned: desktops across the top, windows of the chosen desktop below, solid background.
 - New Settings app (search, Network, Display, Sound, Accounts, Updates, About ...) and a new Wi-Fi window.
