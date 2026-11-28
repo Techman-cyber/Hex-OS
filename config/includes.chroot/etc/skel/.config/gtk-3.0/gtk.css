@@ -1,0 +1,2 @@
+button, entry, spinbutton { border-radius: 8px; }
+*:selected, *:selected:focus { background-color: #14968a; color: #ffffff; }
